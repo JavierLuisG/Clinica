@@ -6,11 +6,13 @@ import com.backend.clinica.model.Domicilio;
 import com.backend.clinica.model.Paciente;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class PacienteDaoH2 implements IDao<String, Paciente> {
   Logger LOGGER = LoggerFactory.getLogger(DomicilioDaoH2.class);
   private final String INSERT =
@@ -30,9 +32,9 @@ public class PacienteDaoH2 implements IDao<String, Paciente> {
                   "INNER JOIN DOMICILIOS D ON P.ID_DOMICILIO = D.ID " +
                   "WHERE P.STATE = TRUE";
   private final String UPDATE =
-          "UPDATE PACIENTES SET NOMBRE = ?, APELLIDO = ?, ID_DOMICILIO = ? WHERE DNI = ?";
+          "UPDATE PACIENTES SET NOMBRE = ?, APELLIDO = ?, ID_DOMICILIO = ? WHERE DNI = ? AND STATE = TRUE";
   private final String DELETE =
-          "UPDATE PACIENTES SET STATE = ? WHERE DNI = ?";
+          "UPDATE PACIENTES SET STATE = ? WHERE DNI = ? AND STATE = TRUE";
 
   public Paciente create(Connection conn, Paciente paciente) throws SQLException {
     Paciente createPaciente = null;

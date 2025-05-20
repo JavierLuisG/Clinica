@@ -5,11 +5,13 @@ import com.backend.clinica.db.H2Connection;
 import com.backend.clinica.model.Domicilio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class DomicilioDaoH2 implements IDao<Integer, Domicilio> {
   Logger LOGGER = LoggerFactory.getLogger(DomicilioDaoH2.class);
   private final String INSERT =

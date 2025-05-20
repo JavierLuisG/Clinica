@@ -3,9 +3,11 @@ package com.backend.clinica.service.impl;
 import com.backend.clinica.dao.IDao;
 import com.backend.clinica.model.Domicilio;
 import com.backend.clinica.service.IDomicilioService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class DomicilioService implements IDomicilioService<Integer, Domicilio> {
   private final IDao<Integer, Domicilio> domicilioIDao;
 
