@@ -36,7 +36,7 @@ class PacienteServiceTest {
     Connection conn = null;
     try {
       Class.forName("org.h2.Driver");
-      conn = DriverManager.getConnection("jdbc:h2:~/clinica;INIT=RUNSCRIPT FROM 'create.sql'", "sa", "sa");
+      conn = DriverManager.getConnection("jdbc:h2:~/clinica;INIT=RUNSCRIPT FROM 'classpath:create.sql'", "sa", "sa");
     } catch (ClassNotFoundException | SQLException e) {
       LOGGER.error("Error al inicializar la base de datos: " + e);
     } finally {
