@@ -5,7 +5,7 @@ import java.util.List;
 public interface IOdontologoService<TypeO, O> {
   O createOdontologo(O o);
 
-  O getOdontologoByRef(TypeO codigo);
+  O getOdontologoByCodigo(TypeO codigo);
 
   List<O> getAllOdontologos();
 

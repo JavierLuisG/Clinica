@@ -62,12 +62,12 @@ public class OdontologoDaoH2 implements IDao<String, Odontologo> {
   }
 
   @Override
-  public Odontologo readOne(String ref) {
+  public Odontologo readOne(String codigo) {
     Odontologo responseOdontologo = null;
     try (Connection conn = H2Connection.getConnection();
          PreparedStatement ps = conn.prepareStatement(SELECT_BY_MATRICULA)
     ) {
-      ps.setString(1, ref);
+      ps.setString(1, codigo);
 
       try (ResultSet rs = ps.executeQuery()) {
         if (rs.next()) {
@@ -110,7 +110,7 @@ public class OdontologoDaoH2 implements IDao<String, Odontologo> {
   }
 
   @Override
-  public Odontologo update(String ref, Odontologo odontologo) {
+  public Odontologo update(String codigo, Odontologo odontologo) {
     Odontologo responseOdontologo = null;
     Connection conn = null;
     try {
@@ -120,11 +120,11 @@ public class OdontologoDaoH2 implements IDao<String, Odontologo> {
       try (PreparedStatement ps = conn.prepareStatement(UPDATE)) {
         ps.setString(1, odontologo.getNombre());
         ps.setString(2, odontologo.getApellido());
-        ps.setString(3, ref);
+        ps.setString(3, codigo);
 
         if (ps.executeUpdate() > 0) {
           conn.commit(); // debe ser antes del readOne() para que se ejecute realmente el cambio con el commit
-          responseOdontologo = readOne(ref); // ya realizado el cambio si se busca
+          responseOdontologo = readOne(codigo); // ya realizado el cambio si se busca
           LOGGER.info("Actualizado: " + responseOdontologo);
         }
       }
@@ -138,7 +138,7 @@ public class OdontologoDaoH2 implements IDao<String, Odontologo> {
   }
 
   @Override
-  public boolean delete(String ref) {
+  public boolean delete(String codigo) {
     boolean deleteOdontologo = false;
     Connection conn = null;
     try {
@@ -146,11 +146,11 @@ public class OdontologoDaoH2 implements IDao<String, Odontologo> {
       conn.setAutoCommit(false);
       try (PreparedStatement ps = conn.prepareStatement(DELETE)) {
         ps.setBoolean(1, false);
-        ps.setString(2, ref);
+        ps.setString(2, codigo);
 
         if (ps.executeUpdate() > 0) {
           deleteOdontologo = true;
-          LOGGER.info("Eliminado odontólogo: " + ref);
+          LOGGER.info("Eliminado odontólogo: " + codigo);
           conn.commit();
         }
       }

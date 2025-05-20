@@ -21,7 +21,7 @@ public class OdontologoService implements IOdontologoService<String, Odontologo>
   }
 
   @Override
-  public Odontologo getOdontologoByRef(String codigo) {
+  public Odontologo getOdontologoByCodigo(String codigo) {
     if (codigo != null) {
       return odontologoIDao.readOne(codigo);
     }
