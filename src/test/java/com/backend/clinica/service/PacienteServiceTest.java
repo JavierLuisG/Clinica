@@ -60,7 +60,7 @@ class PacienteServiceTest {
   @Test
   @DisplayName("Buscar por DNI")
   void testGetOne() {
-    Paciente pacienteObtenido = ps.getPaciente("87654321");
+    Paciente pacienteObtenido = ps.getPacienteByDni("87654321");
     String expected = "Paciente id: 2 - state: true - nombre: Bruce - apellido: Wayne - dni: 87654321 - " +
             "fecha registro: 2025-05-20, Domicilio id: 2 - state: true - calle: Calle Falsa - numero: 123 - ciudad: Nueva Jersey - localidad: Ciudad Gótica";
     assertEquals(expected, pacienteObtenido.toString());
@@ -76,7 +76,7 @@ class PacienteServiceTest {
   @Test
   @DisplayName("Asignar direccion ya creada a paciente nuevo")
   void testYetDomicilio() {
-    Domicilio domicilioObtenido = ps.getDomicilio(2);
+    Domicilio domicilioObtenido = ps.getDomicilioById(2);
     Paciente pacienteCreado = new Paciente("Carlos", "Vives", "53223378", LocalDate.now(), domicilioObtenido);
     assertNotNull(ps.createPaciente(pacienteCreado));
   }
