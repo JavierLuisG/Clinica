@@ -23,10 +23,36 @@ public class DomicilioDaoH2 implements IDao<Integer, Domicilio> {
   private final String DELETE =
           "UPDATE DOMICILIOS SET STATE = ? WHERE ID = ?";
 
+  public Domicilio create(Connection conn, Domicilio domicilio) throws SQLException {
+    Domicilio createDomicilio = null;
+    try (PreparedStatement ps = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
+      ps.setString(1, domicilio.getCalle());
+      ps.setString(2, domicilio.getNumero());
+      ps.setString(3, domicilio.getLocalidad());
+      ps.setString(4, domicilio.getCiudad());
+
+      if (ps.executeUpdate() > 0) {
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+          if (rs.next()) {
+            int generatedId = rs.getInt(1);
+            createDomicilio = new Domicilio(
+                    generatedId,
+                    domicilio.getCalle(),
+                    domicilio.getNumero(),
+                    domicilio.getLocalidad(),
+                    domicilio.getCiudad());
+            LOGGER.info("Insertado: " + createDomicilio);
+          }
+        }
+      }
+    }
+    return createDomicilio;
+  }
+
   @Override
   public Domicilio create(Domicilio domicilio) {
+    Domicilio createDomicilio = null;
     Connection conn = null;
-    Domicilio domicilioEncontrado = null;
     try {
       conn = H2Connection.getConnection();
       conn.setAutoCommit(false);
@@ -36,92 +62,158 @@ public class DomicilioDaoH2 implements IDao<Integer, Domicilio> {
         ps.setString(3, domicilio.getLocalidad());
         ps.setString(4, domicilio.getCiudad());
 
-        ps.executeUpdate();
-        try (ResultSet rs = ps.getGeneratedKeys()) {
-          if (rs.next()) {
-            domicilioEncontrado = new Domicilio(
-                    rs.getInt(1),
-                    domicilio.getCalle(),
-                    domicilio.getNumero(),
-                    domicilio.getLocalidad(),
-                    domicilio.getCiudad());
-            LOGGER.info("Insertado: " + domicilioEncontrado);
+        if (ps.executeUpdate() > 0) {
+          try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) {
+              int generatedId = rs.getInt(1);
+              createDomicilio = new Domicilio(
+                      generatedId,
+                      domicilio.getCalle(),
+                      domicilio.getNumero(),
+                      domicilio.getLocalidad(),
+                      domicilio.getCiudad());
+              LOGGER.info("Insertado: " + createDomicilio);
+            }
           }
         }
       }
       conn.commit();
     } catch (SQLException e) {
-      if (conn != null) {
-        try {
-          conn.rollback();
-          LOGGER.error("Transacción revertida. Error: " + e);
-        } catch (SQLException ex) {
-          LOGGER.error("Error al revertir transacción: " + e);
-        }
-      }
+      rollBackCommit(conn, e);
       LOGGER.error("Error al insertar domicilio: " + e);
     } finally {
       closeConnection(conn);
     }
-    return domicilioEncontrado;
+    return createDomicilio;
   }
 
   @Override
   public Domicilio readOne(Integer id) {
-    Domicilio domicilioEncontrado = null;
+    Domicilio responseDomicilio = null;
     try (Connection conn = H2Connection.getConnection();
          PreparedStatement ps = conn.prepareStatement(SELECT_BY_ID)
     ) {
       ps.setInt(1, id);
+
       try (ResultSet rs = ps.executeQuery()) {
         if (rs.next()) {
-          domicilioEncontrado = new Domicilio(
-                  rs.getInt(1),
-                  rs.getString(2),
-                  rs.getString(3),
-                  rs.getString(4),
-                  rs.getString(5));
-          LOGGER.info("Seleccionado: " + domicilioEncontrado);
+          responseDomicilio = new Domicilio(
+                  rs.getInt("ID"),
+                  rs.getString("CALLE"),
+                  rs.getString("NUMERO"),
+                  rs.getString("LOCALIDAD"),
+                  rs.getString("CIUDAD"));
+          LOGGER.info("Seleccionado: " + responseDomicilio);
         }
       }
     } catch (SQLException e) {
-      LOGGER.error("Error al buscar domicilio: " + e);
+      LOGGER.error("Error al seleccionar domicilio: " + e);
     }
-    return domicilioEncontrado;
+    return responseDomicilio;
   }
 
   @Override
   public List<Domicilio> readAll() {
-    List<Domicilio> listaDomicilios = new ArrayList<>();
+    List<Domicilio> listResponseDomicilios = new ArrayList<>();
     try (Connection conn = H2Connection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(SELECT_ALL)
+         PreparedStatement ps = conn.prepareStatement(SELECT_ALL);
+         ResultSet rs = ps.executeQuery()
     ) {
-      try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-          Domicilio domicilioEncontrado = new Domicilio(
-                  rs.getInt(1),
-                  rs.getString(2),
-                  rs.getString(3),
-                  rs.getString(4),
-                  rs.getString(5));
-          listaDomicilios.add(domicilioEncontrado);
-          LOGGER.info(domicilioEncontrado.toString());
-        }
+      LOGGER.info("List...");
+      while (rs.next()) {
+        Domicilio getDomicilio = new Domicilio(
+                rs.getInt("ID"),
+                rs.getString("CALLE"),
+                rs.getString("NUMERO"),
+                rs.getString("LOCALIDAD"),
+                rs.getString("CIUDAD"));
+        listResponseDomicilios.add(getDomicilio);
+        LOGGER.info(getDomicilio.toString());
       }
+      LOGGER.info("...");
     } catch (SQLException e) {
       LOGGER.error("Error al listar domicilios: " + e);
     }
-    return listaDomicilios;
+    return listResponseDomicilios;
+  }
+
+  public void update(Connection conn, Integer id, Domicilio domicilio) throws SQLException {
+    try (PreparedStatement ps = conn.prepareStatement(UPDATE)) {
+      ps.setString(1, domicilio.getCalle());
+      ps.setString(2, domicilio.getNumero());
+      ps.setString(3, domicilio.getLocalidad());
+      ps.setString(4, domicilio.getCiudad());
+      ps.setInt(5, id);
+
+      if (ps.executeUpdate() > 0) {
+        LOGGER.info("Actualizado domicilio: " + id);
+      }
+    }
   }
 
   @Override
-  public Domicilio update(Integer integer, Domicilio domicilio) {
-    return null;
+  public Domicilio update(Integer id, Domicilio domicilio) {
+    Domicilio responseDomicilio = null;
+    Connection conn = null;
+    try {
+      conn = H2Connection.getConnection();
+      conn.setAutoCommit(false);
+
+      try (PreparedStatement ps = conn.prepareStatement(UPDATE)) {
+        ps.setString(1, domicilio.getCalle());
+        ps.setString(2, domicilio.getNumero());
+        ps.setString(3, domicilio.getLocalidad());
+        ps.setString(4, domicilio.getCiudad());
+        ps.setInt(5, id);
+
+        if (ps.executeUpdate() > 0) {
+          conn.commit();
+          responseDomicilio = readOne(id);
+          LOGGER.info("Actualizado: " + responseDomicilio);
+        }
+      }
+    } catch (SQLException e) {
+      rollBackCommit(conn, e);
+      LOGGER.error("Error al actualizar domicilio: " + e);
+    } finally {
+      closeConnection(conn);
+    }
+    return responseDomicilio;
   }
 
   @Override
-  public boolean delete(Integer integer) {
-    return false;
+  public boolean delete(Integer id) {
+    boolean deleteDomicilio = false;
+    Connection conn = null;
+    try {
+      conn = H2Connection.getConnection();
+      conn.setAutoCommit(false);
+      try (PreparedStatement ps = conn.prepareStatement(DELETE)) {
+        ps.setBoolean(1, false);
+        ps.setInt(2, id);
+
+        if (ps.executeUpdate() > 0) {
+          deleteDomicilio = true;
+          conn.commit();
+          LOGGER.info("Eliminado domicilio: " + id);
+        }
+      }
+    } catch (SQLException e) {
+      rollBackCommit(conn, e);
+      LOGGER.error("Error al eliminar domicilio: " + e);
+    } finally {
+      closeConnection(conn);
+    }
+    return deleteDomicilio;
+  }
+
+  public void rollBackCommit(Connection conn, SQLException e) {
+    try {
+      conn.rollback();
+      LOGGER.warn("Transacción revertida: " + e);
+    } catch (SQLException ex) {
+      LOGGER.error("Error en transacción revertida: " + e);
+    }
   }
 
   private void closeConnection(Connection conn) {

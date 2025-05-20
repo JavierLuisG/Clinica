@@ -34,14 +34,42 @@ public class PacienteDaoH2 implements IDao<String, Paciente> {
   private final String DELETE =
           "UPDATE PACIENTES SET STATE = ? WHERE DNI = ?";
 
+  public Paciente create(Connection conn, Paciente paciente) throws SQLException {
+    Paciente createPaciente = null;
+    try (PreparedStatement ps = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
+      ps.setString(1, paciente.getNombre());
+      ps.setString(2, paciente.getApellido());
+      ps.setString(3, paciente.getDni());
+      ps.setDate(4, Date.valueOf(paciente.getFechaRegistro()));
+      ps.setInt(5, paciente.getDomicilio().getId());
+
+      if (ps.executeUpdate() > 0) {
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+          if (rs.next()) {
+            int generatedId = rs.getInt(1);
+            createPaciente = new Paciente(
+                    generatedId,
+                    paciente.getNombre(),
+                    paciente.getApellido(),
+                    paciente.getDni(),
+                    paciente.getFechaRegistro(),
+                    paciente.getDomicilio());
+            LOGGER.info("Insertado: " + createPaciente);
+          }
+        }
+      }
+    }
+    return createPaciente;
+  }
+
   @Override
   public Paciente create(Paciente paciente) {
-    System.out.println(paciente);
+    Paciente createPaciente = null;
     Connection conn = null;
-    Paciente pacienteEncontrado = null;
     try {
       conn = H2Connection.getConnection();
       conn.setAutoCommit(false);
+
       try (PreparedStatement ps = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
         ps.setString(1, paciente.getNombre());
         ps.setString(2, paciente.getApellido());
@@ -49,113 +77,179 @@ public class PacienteDaoH2 implements IDao<String, Paciente> {
         ps.setDate(4, Date.valueOf(paciente.getFechaRegistro()));
         ps.setInt(5, paciente.getDomicilio().getId());
 
-        ps.executeUpdate();
-        try (ResultSet rs = ps.getGeneratedKeys()) {
-          if (rs.next()) {
-            pacienteEncontrado = new Paciente(
-                    rs.getInt(1),
-                    paciente.getNombre(),
-                    paciente.getApellido(),
-                    paciente.getDni(),
-                    paciente.getFechaRegistro(),
-                    paciente.getDomicilio());
-            LOGGER.info("Insertado: " + pacienteEncontrado);
+        if (ps.executeUpdate() > 0) {
+          try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) {
+              int generatedId = rs.getInt(1);
+              createPaciente = new Paciente(
+                      generatedId,
+                      paciente.getNombre(),
+                      paciente.getApellido(),
+                      paciente.getDni(),
+                      paciente.getFechaRegistro(),
+                      paciente.getDomicilio());
+              LOGGER.info("Insertado: " + createPaciente);
+            }
           }
         }
       }
       conn.commit();
     } catch (SQLException e) {
-      try {
-        conn.rollback();
-        LOGGER.error("Transacción revertida. Error: " + e);
-      } catch (SQLException ex) {
-        LOGGER.error("Error al revertir transacción: " + e);
-      }
+      rollBackCommit(conn, e);
       LOGGER.error("Error al insertar paciente: " + e);
     } finally {
       closeConnection(conn);
     }
-    return pacienteEncontrado;
+    return createPaciente;
   }
 
   @Override
   public Paciente readOne(String dni) {
-    Paciente pacienteEncontrado = null;
+    Paciente responsePaciente = null;
     try (Connection conn = H2Connection.getConnection();
          PreparedStatement ps = conn.prepareStatement(SELECT_BY_DNI)
     ) {
       ps.setString(1, dni);
+
       try (ResultSet rs = ps.executeQuery()) {
         if (rs.next()) {
-          Domicilio dom = new Domicilio(
-                  rs.getInt(6),
-                  rs.getString(7),
-                  rs.getString(8),
-                  rs.getString(9),
-                  rs.getString(10));
-          pacienteEncontrado = new Paciente(
-                  rs.getInt(1),
-                  rs.getString(2),
-                  rs.getString(3),
-                  rs.getString(4),
-                  rs.getDate(5).toLocalDate(),
-                  dom);
-          LOGGER.info("Seleccionado: " + pacienteEncontrado);
+          Domicilio getDomicilio = new Domicilio(
+                  rs.getInt("DOMICILIO_ID"),
+                  rs.getString("CALLE"),
+                  rs.getString("NUMERO"),
+                  rs.getString("LOCALIDAD"),
+                  rs.getString("CIUDAD"));
+          responsePaciente = new Paciente(
+                  rs.getInt("PACIENTE_ID"),
+                  rs.getString("NOMBRE"),
+                  rs.getString("APELLIDO"),
+                  rs.getString("DNI"),
+                  rs.getDate("FECHA_REGISTRO").toLocalDate(),
+                  getDomicilio);
+          LOGGER.info("Seleccionado: " + responsePaciente);
         }
       }
     } catch (SQLException e) {
-      LOGGER.error("Error al buscar paciente: " + e);
+      LOGGER.error("Error al seleccionar paciente: " + e);
     }
-    return pacienteEncontrado;
+    return responsePaciente;
   }
 
   @Override
   public List<Paciente> readAll() {
-    List<Paciente> listaPacientes = new ArrayList<>();
+    List<Paciente> listResponsePacientes = new ArrayList<>();
     try (Connection conn = H2Connection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(SELECT_ALL)
+         PreparedStatement ps = conn.prepareStatement(SELECT_ALL);
+         ResultSet rs = ps.executeQuery()
     ) {
-      try (ResultSet rs = ps.executeQuery()) {
-        while (rs.next()) {
-          Domicilio dom = new Domicilio(
-                  rs.getInt(6),
-                  rs.getString(7),
-                  rs.getString(8),
-                  rs.getString(9),
-                  rs.getString(10));
-          Paciente pacienteEncontrado = new Paciente(
-                  rs.getInt(1),
-                  rs.getString(2),
-                  rs.getString(3),
-                  rs.getString(4),
-                  rs.getDate(5).toLocalDate(),
-                  dom);
-          listaPacientes.add(pacienteEncontrado);
-          LOGGER.info(pacienteEncontrado.toString());
+      LOGGER.info("List...");
+      while (rs.next()) {
+        Domicilio getDomicilio = new Domicilio(
+                rs.getInt("DOMICILIO_ID"),
+                rs.getString("CALLE"),
+                rs.getString("NUMERO"),
+                rs.getString("LOCALIDAD"),
+                rs.getString("CIUDAD"));
+        Paciente getPaciente = new Paciente(
+                rs.getInt("PACIENTE_ID"),
+                rs.getString("NOMBRE"),
+                rs.getString("APELLIDO"),
+                rs.getString("DNI"),
+                rs.getDate("FECHA_REGISTRO").toLocalDate(),
+                getDomicilio);
+        listResponsePacientes.add(getPaciente);
+        LOGGER.info(getPaciente.toString());
+      }
+      LOGGER.info("...");
+    } catch (SQLException e) {
+      LOGGER.error("Error al listar paciente: " + e);
+    }
+    return listResponsePacientes;
+  }
+
+  public void update(Connection conn, String dni, Paciente paciente) throws SQLException {
+    try (PreparedStatement ps = conn.prepareStatement(UPDATE)) {
+      ps.setString(1, paciente.getNombre());
+      ps.setString(2, paciente.getApellido());
+      ps.setInt(3, paciente.getDomicilio().getId());
+      ps.setString(4, dni);
+
+      if (ps.executeUpdate() > 0) {
+        LOGGER.info("Actualizado paciente: " + dni);
+      }
+    }
+  }
+
+  @Override
+  public Paciente update(String dni, Paciente paciente) {
+    Paciente responsePaciente = null;
+    Connection conn = null;
+    try {
+      conn = H2Connection.getConnection();
+      conn.setAutoCommit(false);
+
+      try (PreparedStatement ps = conn.prepareStatement(UPDATE)) {
+        ps.setString(1, paciente.getNombre());
+        ps.setString(2, paciente.getApellido());
+        ps.setInt(3, paciente.getDomicilio().getId());
+        ps.setString(4, dni);
+
+        if (ps.executeUpdate() > 0) {
+          conn.commit(); // debe ser antes del readOne() para que se ejecute realmente el cambio con el commit
+          responsePaciente = readOne(dni); // ya realizado el cambio si se busca
+          LOGGER.info("Actualizado: " + responsePaciente);
         }
       }
     } catch (SQLException e) {
-      LOGGER.error("Error al listar pacientes: " + e);
+      rollBackCommit(conn, e);
+      LOGGER.error("Error al actualizar paciente: " + e);
+    } finally {
+      closeConnection(conn);
     }
-    return listaPacientes;
+    return responsePaciente;
   }
 
   @Override
-  public Paciente update(String s, Paciente paciente) {
-    return null;
+  public boolean delete(String dni) {
+    boolean deletePaciente = false;
+    Connection conn = null;
+    try {
+      conn = H2Connection.getConnection();
+      conn.setAutoCommit(false);
+      try (PreparedStatement ps = conn.prepareStatement(DELETE)) {
+        ps.setBoolean(1, false);
+        ps.setString(2, dni);
+
+        if (ps.executeUpdate() > 0) {
+          deletePaciente = true;
+          LOGGER.info("Eliminado paciente: " + dni);
+          conn.commit();
+        }
+      }
+    } catch (SQLException e) {
+      rollBackCommit(conn, e);
+      LOGGER.error("Error al eliminar paciente: " + e);
+    } finally {
+      closeConnection(conn);
+    }
+    return deletePaciente;
   }
 
-  @Override
-  public boolean delete(String s) {
-    return false;
+  public void rollBackCommit(Connection conn, SQLException e) {
+    try {
+      conn.rollback();
+      LOGGER.warn("Transacción revertida: " + e);
+    } catch (SQLException ex) {
+      LOGGER.error("Error en transacción revertida: " + e);
+    }
   }
 
-  private void closeConnection(Connection conn) {
+  public void closeConnection(Connection conn) {
     if (conn != null) {
       try {
         conn.close();
       } catch (SQLException e) {
-        LOGGER.error("Error al cerrar la conexión: " + e);
+        LOGGER.warn("Error al cerrar la conexión: " + e);
       }
     }
   }
