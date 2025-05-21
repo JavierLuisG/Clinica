@@ -69,8 +69,7 @@ public class PacienteController {
     }
     if (!iPacienteService.deletePaciente(dni)) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    } else {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
   }
 }

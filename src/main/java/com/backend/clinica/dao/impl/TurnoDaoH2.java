@@ -8,11 +8,13 @@ import com.backend.clinica.model.Paciente;
 import com.backend.clinica.model.Turno;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class TurnoDaoH2 implements IDao<Integer, Turno> {
   Logger LOGGER = LoggerFactory.getLogger(TurnoDaoH2.class);
   private final String INSERT =

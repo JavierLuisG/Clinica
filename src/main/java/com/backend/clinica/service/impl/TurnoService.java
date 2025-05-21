@@ -3,9 +3,11 @@ package com.backend.clinica.service.impl;
 import com.backend.clinica.dao.IDao;
 import com.backend.clinica.model.Turno;
 import com.backend.clinica.service.ITurnoService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class TurnoService implements ITurnoService<Integer, Turno> {
   private final IDao<Integer, Turno> turnoIDao;
 
