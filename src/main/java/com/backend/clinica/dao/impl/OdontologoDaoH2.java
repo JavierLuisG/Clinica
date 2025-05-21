@@ -16,7 +16,7 @@ public class OdontologoDaoH2 implements IDao<String, Odontologo> {
   private final Logger LOGGER = LoggerFactory.getLogger(PacienteDaoH2.class);
   private final String INSERT =
           "INSERT INTO ODONTOLOGOS (CODIGO, NOMBRE, APELLIDO) VALUES (?,?,?)";
-  private final String SELECT_BY_MATRICULA =
+  private final String SELECT_BY_CODIGO =
           "SELECT * FROM ODONTOLOGOS WHERE CODIGO = ? AND STATE = TRUE";
   private final String SELECT_ALL =
           "SELECT * FROM ODONTOLOGOS WHERE STATE = TRUE";
@@ -65,7 +65,7 @@ public class OdontologoDaoH2 implements IDao<String, Odontologo> {
   public Odontologo readOne(String codigo) {
     Odontologo responseOdontologo = null;
     try (Connection conn = H2Connection.getConnection();
-         PreparedStatement ps = conn.prepareStatement(SELECT_BY_MATRICULA)
+         PreparedStatement ps = conn.prepareStatement(SELECT_BY_CODIGO)
     ) {
       ps.setString(1, codigo);
 

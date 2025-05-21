@@ -1,48 +1,24 @@
 package com.backend.clinica.service;
 
 import com.backend.clinica.dao.impl.OdontologoDaoH2;
+import com.backend.clinica.db.H2Connection;
 import com.backend.clinica.model.Odontologo;
 import com.backend.clinica.service.impl.OdontologoService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class OdontologoServiceTest {
-  static Logger LOGGER = LoggerFactory.getLogger(OdontologoServiceTest.class);
-  private static OdontologoService os;
+  private static OdontologoService odontologoService;
 
   @BeforeAll
   static void setUp() {
-    createTable();
-    os = new OdontologoService(new OdontologoDaoH2());
-  }
-
-  static void createTable() {
-    Connection conn = null;
-    String url = "jdbc:h2:~/clinica;INIT=RUNSCRIPT FROM 'classpath:create.sql'";
-    try {
-      Class.forName("org.h2.Driver");
-      conn = DriverManager.getConnection(url, "sa", "sa");
-    } catch (ClassNotFoundException | SQLException e) {
-      LOGGER.error("Error al inicializar la base de datos: " + e);
-    } finally {
-      if (conn != null) {
-        try {
-          conn.close();
-        } catch (SQLException e) {
-          LOGGER.error("Error al cerrar la conexión: " + e);
-        }
-      }
-    }
+    H2Connection.createTable();
+    odontologoService = new OdontologoService(new OdontologoDaoH2());
   }
 
   @Test
@@ -50,19 +26,19 @@ class OdontologoServiceTest {
   void insertarOdontologo() {
     // Crear un nuevo odontologo
     Odontologo odontologoCreado = new Odontologo("OD00129", "Camilo", "Perez");
-    Odontologo resOdontologo = os.createOdontologo(odontologoCreado);
+    Odontologo resOdontologo = odontologoService.createOdontologo(odontologoCreado);
     assertNotNull(resOdontologo, "El odontólogo debería haberse creado");
     assertNotNull(resOdontologo.getId(), "El odontólogo debería tener un ID asignado");
 
     // Verificar que se puede recuperar por matricula
-    Odontologo odontologoRecuperado = os.getOdontologoByCodigo("OD00129");
+    Odontologo odontologoRecuperado = odontologoService.getOdontologoByCodigo("OD00129");
     assertNotNull(odontologoRecuperado, "Se debería poder recuperar el odontólogo por Código");
   }
 
   @Test
   @DisplayName("Buscar odontólogo por Código")
   void testGetPacienteByDni() {
-    Odontologo odontologoObtenido = os.getOdontologoByCodigo("OD00127");
+    Odontologo odontologoObtenido = odontologoService.getOdontologoByCodigo("OD00127");
     assertNotNull(odontologoObtenido, "El odontólogo debería existir");
     assertEquals("María", odontologoObtenido.getNombre(), "El nombre debe coincidir");
     assertEquals("López", odontologoObtenido.getApellido(), "El apellido debe coincidir");
@@ -71,7 +47,7 @@ class OdontologoServiceTest {
   @Test
   @DisplayName("Listar todos los odontólogos")
   void obtenerOdontologos() {
-    List<Odontologo> listaObtenida = os.getAllOdontologos();
+    List<Odontologo> listaObtenida = odontologoService.getAllOdontologos();
     assertEquals(7, listaObtenida.size());
 
     assertNotNull(listaObtenida, "La lista no debería ser nula");
@@ -82,7 +58,7 @@ class OdontologoServiceTest {
   @DisplayName("Actualizar información de un odontólogo")
   void testUpdateOdontólogo() {
     // Obtener un odontólogo existente
-    Odontologo odontologoOriginal = os.getOdontologoByCodigo("OD00125");
+    Odontologo odontologoOriginal = odontologoService.getOdontologoByCodigo("OD00125");
     assertNotNull(odontologoOriginal, "El odontólogo debería existir");
 
     // Cambiar algunos datos
@@ -97,7 +73,7 @@ class OdontologoServiceTest {
     );
 
     // Actualizar odontólogo
-    Odontologo resultado = os.updateOdontologo("OD00125", odontologoActualizado);
+    Odontologo resultado = odontologoService.updateOdontologo("OD00125", odontologoActualizado);
 
     // Verificar actualización
     assertNotNull(resultado, "El resultado no debería ser nulo");
@@ -106,7 +82,7 @@ class OdontologoServiceTest {
     assertEquals(odontologoOriginal.getCodigo(), resultado.getCodigo(), "El Código debería seguir siendo el mismo");
 
     // Verificar recuperando el paciente otra vez
-    Odontologo verificacion = os.getOdontologoByCodigo("OD00125");
+    Odontologo verificacion = odontologoService.getOdontologoByCodigo("OD00125");
     assertEquals(nuevoNombre, verificacion.getNombre(), "El nombre debería seguir actualizado");
   }
 
@@ -114,15 +90,15 @@ class OdontologoServiceTest {
   @DisplayName("Eliminar un odontólogo")
   void testDeletePaciente() {
     // Verificar que existe
-    Odontologo verificacionExistencia = os.getOdontologoByCodigo("OD00125");
+    Odontologo verificacionExistencia = odontologoService.getOdontologoByCodigo("OD00125");
     assertNotNull(verificacionExistencia, "El odontólogo debería existir antes de eliminarlo");
 
     // Eliminar odontólogo
-    boolean resultado = os.deleteOdontologo("OD00125");
+    boolean resultado = odontologoService.deleteOdontologo("OD00125");
     assertTrue(resultado, "La eliminación debería ser exitosa");
 
     // Verificar que ya no se puede recuperar
-    Odontologo verificacionEliminacion = os.getOdontologoByCodigo("OD00125");
+    Odontologo verificacionEliminacion = odontologoService.getOdontologoByCodigo("OD00125");
     assertNull(verificacionEliminacion, "El odontólogo no debería existir después de eliminarlo");
   }
 
@@ -130,11 +106,11 @@ class OdontologoServiceTest {
   @DisplayName("Probar manejo de errores con entradas inválidas")
   void testErrorHandling() {
     // Buscar odontólogo con Matrícula null
-    Odontologo odontologoNulo = os.getOdontologoByCodigo(null);
+    Odontologo odontologoNulo = odontologoService.getOdontologoByCodigo(null);
     assertNull(odontologoNulo, "Un Código nulo debería devolver null");
 
     // Buscar odontólogo con Matrícula inexistente
-    Odontologo odontologoInexistente = os.getOdontologoByCodigo("00000000");
+    Odontologo odontologoInexistente = odontologoService.getOdontologoByCodigo("00000000");
     assertNull(odontologoInexistente, "Un Código inexistente debería devolver null");
   }
 }
