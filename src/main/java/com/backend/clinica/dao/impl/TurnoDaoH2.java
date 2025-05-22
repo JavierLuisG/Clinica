@@ -21,9 +21,9 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
           "INSERT INTO TURNOS (FECHA_CONSULTA, ID_ODONTOLOGO, ID_PACIENTE) VALUES (?,?,?)";
   private final String SELECT_BY_ID =
           "SELECT " +
-                  "T.ID AS TURNO_ID, T.FECHA_CONSULTA, " +
-                  "O.ID AS ODONTOLOGO_ID, O.CODIGO, O.NOMBRE, O.APELLIDO, " +
-                  "P.ID AS PACIENTE_ID, P.NOMBRE, P.APELLIDO, P.DNI, P.FECHA_REGISTRO, " +
+                  "T.ID AS TURNO_ID, T.FECHA_CONSULTA, T.STATE AS TURNO_STATE, " +
+                  "O.ID AS ODONTOLOGO_ID, O.CODIGO AS ODONTOLOGO_CODIGO, O.NOMBRE AS ODONTOLOGO_NOMBRE, O.APELLIDO AS ODONTOLOGO_APELLIDO, " +
+                  "P.ID AS PACIENTE_ID, P.NOMBRE AS PACIENTE_NOMBRE, P.APELLIDO AS PACIENTE_APELLIDO, P.DNI, P.FECHA_REGISTRO, " +
                   "D.ID AS DOMICILIO_ID, D.CALLE, D.NUMERO, D.LOCALIDAD, D.CIUDAD " +
                   "FROM TURNOS T " +
                   "INNER JOIN ODONTOLOGOS O ON T.ID_ODONTOLOGO = O.ID " +
@@ -32,9 +32,9 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
                   "WHERE T.ID = ? AND T.STATE = TRUE";
   private final String SELECT_ALL =
           "SELECT " +
-                  "T.ID AS TURNO_ID, T.FECHA_CONSULTA, " +
-                  "O.ID AS ODONTOLOGO_ID, O.CODIGO, O.NOMBRE, O.APELLIDO, " +
-                  "P.ID AS PACIENTE_ID, P.NOMBRE, P.APELLIDO, P.DNI, P.FECHA_REGISTRO, " +
+                  "T.ID AS TURNO_ID, T.FECHA_CONSULTA, T.STATE AS TURNO_STATE, " +
+                  "O.ID AS ODONTOLOGO_ID, O.CODIGO, O.NOMBRE AS ODONTOLOGO_NOMBRE, O.APELLIDO AS ODONTOLOGO_APELLIDO, " +
+                  "P.ID AS PACIENTE_ID, P.NOMBRE AS PACIENTE_NOMBRE, P.APELLIDO AS PACIENTE_APELLIDO, P.DNI, P.FECHA_REGISTRO, " +
                   "D.ID AS DOMICILIO_ID, D.CALLE, D.NUMERO, D.LOCALIDAD, D.CIUDAD " +
                   "FROM TURNOS T " +
                   "INNER JOIN ODONTOLOGOS O ON T.ID_ODONTOLOGO = O.ID " +
@@ -99,16 +99,16 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
                   rs.getString("CIUDAD"));
           Paciente getPaciente = new Paciente(
                   rs.getInt("PACIENTE_ID"),
-                  rs.getString("NOMBRE"),
-                  rs.getString("APELLIDO"),
+                  rs.getString("PACIENTE_NOMBRE"),
+                  rs.getString("PACIENTE_APELLIDO"),
                   rs.getString("DNI"),
                   rs.getDate("FECHA_REGISTRO").toLocalDate(),
                   getDomicilio);
           Odontologo getOdontologo = new Odontologo(
                   rs.getInt("ODONTOLOGO_ID"),
                   rs.getString("CODIGO"),
-                  rs.getString("NOMBRE"),
-                  rs.getString("APELLIDO"));
+                  rs.getString("ODONTOLOGO_NOMBRE"),
+                  rs.getString("ODONTOLOGO_APELLIDO"));
           responseTurno = new Turno(
                   rs.getInt("TURNO_ID"),
                   rs.getDate("FECHA_CONSULTA").toLocalDate(),
@@ -140,8 +140,8 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
                 rs.getString("CIUDAD"));
         Paciente getPaciente = new Paciente(
                 rs.getInt("PACIENTE_ID"),
-                rs.getString("NOMBRE"),
-                rs.getString("APELLIDO"),
+                rs.getString("PACIENTE_NOMBRE"),
+                rs.getString("PACIENTE_APELLIDO"),
                 rs.getString("DNI"),
                 rs.getDate("FECHA_REGISTRO").toLocalDate(),
                 getDomicilio);

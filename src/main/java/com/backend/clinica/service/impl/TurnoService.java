@@ -20,7 +20,11 @@ public class TurnoService implements ITurnoService<Integer, Turno> {
     if (turno == null || turno.getOdontologo().getId() == null || turno.getPaciente().getId() == null) {
       return null;
     }
-    return turnoIDao.create(turno);
+    Turno createTurno =  turnoIDao.create(turno);
+    if (createTurno.getId() == null) {
+      return null;
+    }
+    return turnoIDao.readOne(createTurno.getId());
   }
 
   @Override
