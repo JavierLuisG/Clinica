@@ -2,14 +2,14 @@ package com.backend.clinica.service;
 
 import java.util.List;
 
-public interface ITurnoService<TypeT, T> {
-  T createTurno(T t);
+public interface ITurnoService<Type, Request, Response> {
+  Response createTurno(Request t);
 
-  T getTurnoById(TypeT id);
+  Response getTurnoById(Type id);
 
-  List<T> getAllTurnos();
+  List<Response> getAllTurnos();
 
-  T updateTurno(TypeT id, T t);
+  Response updateTurno(Type id, Request t);
 
-  boolean deleteTurno(TypeT id);
+  boolean deleteTurno(Type id);
 }

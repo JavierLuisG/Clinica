@@ -1,51 +1,137 @@
 package com.backend.clinica.service.impl;
 
 import com.backend.clinica.dao.IDao;
+import com.backend.clinica.dto.request.TurnoRequestDto;
+import com.backend.clinica.dto.response.DomicilioResponseDto;
+import com.backend.clinica.dto.response.OdontologoResponseDto;
+import com.backend.clinica.dto.response.PacienteResponseDto;
+import com.backend.clinica.dto.response.TurnoResponseDto;
+import com.backend.clinica.model.Domicilio;
+import com.backend.clinica.model.Odontologo;
+import com.backend.clinica.model.Paciente;
 import com.backend.clinica.model.Turno;
 import com.backend.clinica.service.ITurnoService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class TurnoService implements ITurnoService<Integer, Turno> {
+public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, TurnoResponseDto> {
   private final IDao<Integer, Turno> turnoIDao;
+  private final IDao<String, Odontologo> odontologoIDao;
+  private final IDao<String, Paciente> pacienteIDao;
 
-  public TurnoService(IDao<Integer, Turno> turnoIDao) {
+  public TurnoService(IDao<Integer, Turno> turnoIDao, IDao<String, Odontologo> odontologoIDao, IDao<String, Paciente> pacienteIDao) {
     this.turnoIDao = turnoIDao;
+    this.odontologoIDao = odontologoIDao;
+    this.pacienteIDao = pacienteIDao;
   }
 
   @Override
-  public Turno createTurno(Turno turno) {
-    if (turno == null || turno.getOdontologo().getId() == null || turno.getPaciente().getId() == null) {
+  public TurnoResponseDto createTurno(TurnoRequestDto turno) {
+    // verificar que no sean null
+    if (turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
       return null;
     }
-    Turno createTurno =  turnoIDao.create(turno);
-    if (createTurno.getId() == null) {
+    Odontologo odontologo = odontologoIDao.readOne(turno.getOdontologoCodigo());
+    Paciente paciente = pacienteIDao.readOne(turno.getPacienteDni());
+    if (odontologo == null || paciente == null) {
       return null;
     }
-    return turnoIDao.readOne(createTurno.getId());
+    Turno created = new Turno(
+            LocalDate.parse(turno.getFechaConsulta()),
+            odontologo,
+            paciente);
+    Turno saved = turnoIDao.create(created);
+    if (saved.getId() == null) {
+      return null;
+    }
+    Turno getSaveTurno = turnoIDao.readOne(saved.getId());
+    // al tener que devolver TurnoResponeDto entonces se debe de convertir odontologo y paciente tambien a ResponseDto
+    DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
+            getSaveTurno.getPaciente().getDomicilio().getId(),
+            getSaveTurno.getPaciente().getDomicilio().getCalle(),
+            getSaveTurno.getPaciente().getDomicilio().getNumero(),
+            getSaveTurno.getPaciente().getDomicilio().getLocalidad(),
+            getSaveTurno.getPaciente().getDomicilio().getCiudad());
+    PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
+            getSaveTurno.getPaciente().getId(),
+            getSaveTurno.getPaciente().getNombre(),
+            getSaveTurno.getPaciente().getApellido(),
+            getSaveTurno.getPaciente().getDni(),
+            domicilioResponseDto);
+    OdontologoResponseDto odontologoResponseDto = new OdontologoResponseDto(
+            getSaveTurno.getOdontologo().getId(),
+            getSaveTurno.getOdontologo().getCodigo(),
+            getSaveTurno.getOdontologo().getNombre(),
+            getSaveTurno.getOdontologo().getApellido());
+    // turno en response para devolver
+    TurnoResponseDto turnoResponseDto = new TurnoResponseDto(
+            getSaveTurno.getId(),
+            getSaveTurno.getFechaConsulta().toString(),
+            odontologoResponseDto,
+            pacienteResponseDto);
+    return turnoResponseDto;
   }
 
   @Override
-  public Turno getTurnoById(Integer id) {
+  public TurnoResponseDto getTurnoById(Integer id) {
     if (id == null) {
       return null;
     }
-    return turnoIDao.readOne(id);
-  }
-
-  @Override
-  public List<Turno> getAllTurnos() {
-    return turnoIDao.readAll();
-  }
-
-  @Override
-  public Turno updateTurno(Integer id, Turno turno) {
-    if (id == null || turno == null || turno.getOdontologo() == null || turno.getPaciente() == null) {
+    Turno getTurno = turnoIDao.readOne(id);
+    if (getTurno == null) {
       return null;
     }
-    return turnoIDao.update(id, turno);
+    TurnoResponseDto turnoResponseDto = new TurnoResponseDto(
+            getTurno.getId(),
+            getTurno.getFechaConsulta().toString(),
+            mapToDto(getTurno.getOdontologo()),
+            mapToDto(getTurno.getPaciente())
+    );
+    return turnoResponseDto;
+  }
+
+  @Override
+  public List<TurnoResponseDto> getAllTurnos() {
+    List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
+    List<Turno> turnoList = turnoIDao.readAll();
+    for (Turno turno : turnoList) {
+      turnoResponseDtoList.add(new TurnoResponseDto(
+              turno.getId(),
+              turno.getFechaConsulta().toString(),
+              mapToDto(turno.getOdontologo()),
+              mapToDto(turno.getPaciente())));
+    }
+    return turnoResponseDtoList;
+  }
+
+  @Override
+  public TurnoResponseDto updateTurno(Integer id, TurnoRequestDto turno) {
+    if (id == null || turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
+      return null;
+    }
+    Odontologo odontologo = odontologoIDao.readOne(turno.getOdontologoCodigo());
+    Paciente paciente = pacienteIDao.readOne(turno.getPacienteDni());
+    Turno getTurno = turnoIDao.readOne(id);
+    if (getTurno == null) {
+      return null;
+    }
+    Turno created = new Turno(
+            getTurno.getId(),
+            LocalDate.parse(turno.getFechaConsulta()),
+            odontologo,
+            paciente
+    );
+    Turno updated = turnoIDao.update(id, created);
+    TurnoResponseDto turnoResponseDto = new TurnoResponseDto(
+            updated.getId(),
+            updated.getFechaConsulta().toString(),
+            mapToDto(odontologo),
+            mapToDto(paciente));
+    return turnoResponseDto;
   }
 
   @Override
@@ -54,5 +140,31 @@ public class TurnoService implements ITurnoService<Integer, Turno> {
       return false;
     }
     return turnoIDao.delete(id);
+  }
+
+  private OdontologoResponseDto mapToDto(Odontologo odontologo) {
+    return new OdontologoResponseDto(
+            odontologo.getId(),
+            odontologo.getCodigo(),
+            odontologo.getNombre(),
+            odontologo.getApellido());
+  }
+
+  private PacienteResponseDto mapToDto(Paciente paciente) {
+    return new PacienteResponseDto(
+            paciente.getId(),
+            paciente.getNombre(),
+            paciente.getApellido(),
+            paciente.getDni(),
+            mapToDto(paciente.getDomicilio()));
+  }
+
+  private DomicilioResponseDto mapToDto(Domicilio domicilio) {
+    return new DomicilioResponseDto(
+            domicilio.getId(),
+            domicilio.getCalle(),
+            domicilio.getNumero(),
+            domicilio.getLocalidad(),
+            domicilio.getCiudad());
   }
 }
