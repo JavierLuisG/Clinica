@@ -31,7 +31,6 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
 
   @Override
   public TurnoResponseDto createTurno(TurnoRequestDto turno) {
-    // verificar que no sean null
     if (turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
       return null;
     }
@@ -49,31 +48,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
       return null;
     }
     Turno getSaveTurno = turnoIDao.readOne(saved.getId());
-    // al tener que devolver TurnoResponeDto entonces se debe de convertir odontologo y paciente tambien a ResponseDto
-    DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            getSaveTurno.getPaciente().getDomicilio().getId(),
-            getSaveTurno.getPaciente().getDomicilio().getCalle(),
-            getSaveTurno.getPaciente().getDomicilio().getNumero(),
-            getSaveTurno.getPaciente().getDomicilio().getLocalidad(),
-            getSaveTurno.getPaciente().getDomicilio().getCiudad());
-    PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
-            getSaveTurno.getPaciente().getId(),
-            getSaveTurno.getPaciente().getNombre(),
-            getSaveTurno.getPaciente().getApellido(),
-            getSaveTurno.getPaciente().getDni(),
-            domicilioResponseDto);
-    OdontologoResponseDto odontologoResponseDto = new OdontologoResponseDto(
-            getSaveTurno.getOdontologo().getId(),
-            getSaveTurno.getOdontologo().getCodigo(),
-            getSaveTurno.getOdontologo().getNombre(),
-            getSaveTurno.getOdontologo().getApellido());
-    // turno en response para devolver
-    TurnoResponseDto turnoResponseDto = new TurnoResponseDto(
-            getSaveTurno.getId(),
-            getSaveTurno.getFechaConsulta().toString(),
-            odontologoResponseDto,
-            pacienteResponseDto);
-    return turnoResponseDto;
+    return mapToDto(getSaveTurno);
   }
 
   @Override
@@ -85,13 +60,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     if (getTurno == null) {
       return null;
     }
-    TurnoResponseDto turnoResponseDto = new TurnoResponseDto(
-            getTurno.getId(),
-            getTurno.getFechaConsulta().toString(),
-            mapToDto(getTurno.getOdontologo()),
-            mapToDto(getTurno.getPaciente())
-    );
-    return turnoResponseDto;
+    return mapToDto(getTurno);
   }
 
   @Override
@@ -99,11 +68,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoIDao.readAll();
     for (Turno turno : turnoList) {
-      turnoResponseDtoList.add(new TurnoResponseDto(
-              turno.getId(),
-              turno.getFechaConsulta().toString(),
-              mapToDto(turno.getOdontologo()),
-              mapToDto(turno.getPaciente())));
+      turnoResponseDtoList.add(mapToDto(turno));
     }
     return turnoResponseDtoList;
   }
@@ -126,12 +91,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
             paciente
     );
     Turno updated = turnoIDao.update(id, created);
-    TurnoResponseDto turnoResponseDto = new TurnoResponseDto(
-            updated.getId(),
-            updated.getFechaConsulta().toString(),
-            mapToDto(odontologo),
-            mapToDto(paciente));
-    return turnoResponseDto;
+    return mapToDto(updated);
   }
 
   @Override
@@ -140,6 +100,14 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
       return false;
     }
     return turnoIDao.delete(id);
+  }
+
+  private TurnoResponseDto mapToDto(Turno turno) {
+    return new TurnoResponseDto(
+            turno.getId(),
+            turno.getFechaConsulta().toString(),
+            mapToDto(turno.getOdontologo()),
+            mapToDto(turno.getPaciente()));
   }
 
   private OdontologoResponseDto mapToDto(Odontologo odontologo) {
