@@ -32,12 +32,16 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
     if (saved == null) {
       return null;
     }
+    Domicilio getSaveDomicilio = domicilioIDao.readOne(saved.getId());
+    if (getSaveDomicilio == null) {
+      return null;
+    }
     DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            saved.getId(),
-            saved.getCalle(),
-            saved.getNumero(),
-            saved.getLocalidad(),
-            saved.getCiudad()
+            getSaveDomicilio.getId(),
+            getSaveDomicilio.getCalle(),
+            getSaveDomicilio.getNumero(),
+            getSaveDomicilio.getLocalidad(),
+            getSaveDomicilio.getCiudad()
     );
     return domicilioResponseDto;
   }
@@ -47,16 +51,16 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
     if (id == null) {
       return null;
     }
-    Domicilio domicilio = domicilioIDao.readOne(id);
-    if (domicilio == null) {
+    Domicilio getDomicilio = domicilioIDao.readOne(id);
+    if (getDomicilio == null) {
       return null;
     }
     DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            domicilio.getId(),
-            domicilio.getCalle(),
-            domicilio.getNumero(),
-            domicilio.getLocalidad(),
-            domicilio.getCiudad()
+            getDomicilio.getId(),
+            getDomicilio.getCalle(),
+            getDomicilio.getNumero(),
+            getDomicilio.getLocalidad(),
+            getDomicilio.getCiudad()
     );
     return domicilioResponseDto;
   }
@@ -95,12 +99,19 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
             domicilio.getLocalidad(),
             domicilio.getCiudad());
     Domicilio updated = domicilioIDao.update(id, created);
+    if (updated == null) {
+      return null;
+    }
+    Domicilio getUpdatedDomicilio = domicilioIDao.readOne(updated.getId());
+    if (getUpdatedDomicilio == null) {
+      return null;
+    }
     DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            updated.getId(),
-            updated.getCalle(),
-            updated.getNumero(),
-            updated.getLocalidad(),
-            updated.getCiudad());
+            getUpdatedDomicilio.getId(),
+            getUpdatedDomicilio.getCalle(),
+            getUpdatedDomicilio.getNumero(),
+            getUpdatedDomicilio.getLocalidad(),
+            getUpdatedDomicilio.getCiudad());
     return domicilioResponseDto;
   }
 

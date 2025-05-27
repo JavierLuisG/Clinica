@@ -94,7 +94,11 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
             paciente
     );
     Turno updated = turnoIDao.update(id, created);
-    return mapToDto(updated);
+    if (updated == null) {
+      return null;
+    }
+    Turno getUpdatedTurno = turnoIDao.readOne(updated.getId());
+    return mapToDto(getUpdatedTurno);
   }
 
   @Override

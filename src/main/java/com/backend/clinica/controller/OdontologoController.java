@@ -1,6 +1,7 @@
 package com.backend.clinica.controller;
 
-import com.backend.clinica.model.Odontologo;
+import com.backend.clinica.dto.request.OdontologoRequestDto;
+import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.service.IOdontologoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,18 +12,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/odontologo")
 public class OdontologoController {
-  private final IOdontologoService<String, Odontologo> iOdontologoService;
+  private final IOdontologoService<String, OdontologoRequestDto, OdontologoResponseDto> iOdontologoService;
 
-  public OdontologoController(IOdontologoService<String, Odontologo> iOdontologoService) {
+  public OdontologoController(IOdontologoService<String, OdontologoRequestDto, OdontologoResponseDto> iOdontologoService) {
     this.iOdontologoService = iOdontologoService;
   }
 
   @PostMapping
-  public ResponseEntity<Odontologo> postOdontologo(@RequestBody Odontologo odontologo) {
+  public ResponseEntity<OdontologoResponseDto> postOdontologo(@RequestBody OdontologoRequestDto odontologo) {
     if (odontologo == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    Odontologo createOdontologo = iOdontologoService.createOdontologo(odontologo);
+    OdontologoResponseDto createOdontologo = iOdontologoService.createOdontologo(odontologo);
     if (createOdontologo == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -30,11 +31,11 @@ public class OdontologoController {
   }
 
   @GetMapping("/{codigo}")
-  public ResponseEntity<Odontologo> getOdontologoByCodigo(@PathVariable String codigo) {
+  public ResponseEntity<OdontologoResponseDto> getOdontologoByCodigo(@PathVariable String codigo) {
     if (codigo == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    Odontologo odontologo = iOdontologoService.getOdontologoByCodigo(codigo);
+    OdontologoResponseDto odontologo = iOdontologoService.getOdontologoByCodigo(codigo);
     if (odontologo == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
@@ -42,8 +43,8 @@ public class OdontologoController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Odontologo>> getAllOdontologos() {
-    List<Odontologo> odontologoList = iOdontologoService.getAllOdontologos();
+  public ResponseEntity<List<OdontologoResponseDto>> getAllOdontologos() {
+    List<OdontologoResponseDto> odontologoList = iOdontologoService.getAllOdontologos();
     if (odontologoList.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -51,11 +52,11 @@ public class OdontologoController {
   }
 
   @PutMapping("/{codigo}")
-  public ResponseEntity<Odontologo> putOdontologo(@PathVariable String codigo, @RequestBody Odontologo odontologo) {
+  public ResponseEntity<OdontologoResponseDto> putOdontologo(@PathVariable String codigo, @RequestBody OdontologoRequestDto odontologo) {
     if (codigo == null || codigo.isEmpty() || odontologo == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    Odontologo updateOdontologo = iOdontologoService.updateOdontologo(codigo, odontologo);
+    OdontologoResponseDto updateOdontologo = iOdontologoService.updateOdontologo(codigo, odontologo);
     if (updateOdontologo == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }

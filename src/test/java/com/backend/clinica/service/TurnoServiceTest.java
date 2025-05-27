@@ -5,8 +5,8 @@ import com.backend.clinica.dao.impl.PacienteDaoH2;
 import com.backend.clinica.dao.impl.TurnoDaoH2;
 import com.backend.clinica.db.H2Connection;
 import com.backend.clinica.dto.request.TurnoRequestDto;
+import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
-import com.backend.clinica.model.Odontologo;
 import com.backend.clinica.service.impl.OdontologoService;
 import com.backend.clinica.service.impl.TurnoService;
 import org.junit.jupiter.api.*;
@@ -77,7 +77,7 @@ public class TurnoServiceTest {
     TurnoResponseDto turnoOriginal = turnoService.getTurnoById(7);
     assertNotNull(turnoOriginal, "El turno debería existir");
 
-    Odontologo odontologo = odontologoService.getOdontologoByCodigo("OD00127");
+    OdontologoResponseDto odontologo = odontologoService.getOdontologoByCodigo("OD00127");
     assertNotNull(odontologo, "El odontólogo debería existir para asignarlo en el turno Nro 1");
 
     TurnoRequestDto turnoNuevo = new TurnoRequestDto(turnoOriginal.getFechaConsulta(), odontologo.getCodigo(), turnoOriginal.getPacienteResponseDto().getDni());

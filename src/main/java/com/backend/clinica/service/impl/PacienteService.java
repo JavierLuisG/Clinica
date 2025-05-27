@@ -55,20 +55,25 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
               LocalDate.parse(paciente.getFechaRegistro()),
               savedDomicilio);
       Paciente savedPaciente = ((PacienteDaoH2) pacienteIDao).create(conn, createdPaciente);
-      DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-              savedDomicilio.getId(),
-              savedDomicilio.getCalle(),
-              savedDomicilio.getNumero(),
-              savedDomicilio.getLocalidad(),
-              savedDomicilio.getCiudad());
-      PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
-              savedPaciente.getId(),
-              savedPaciente.getNombre(),
-              savedPaciente.getApellido(),
-              savedPaciente.getDni(),
-              savedPaciente.getFechaRegistro().toString(),
-              domicilioResponseDto);
       conn.commit();
+
+      Paciente getSavePaciente = pacienteIDao.readOne(savedPaciente.getDni());
+      if (getSavePaciente == null) {
+        return null;
+      }
+      DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
+              getSavePaciente.getDomicilio().getId(),
+              getSavePaciente.getDomicilio().getCalle(),
+              getSavePaciente.getDomicilio().getNumero(),
+              getSavePaciente.getDomicilio().getLocalidad(),
+              getSavePaciente.getDomicilio().getCiudad());
+      PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
+              getSavePaciente.getId(),
+              getSavePaciente.getNombre(),
+              getSavePaciente.getApellido(),
+              getSavePaciente.getDni(),
+              getSavePaciente.getFechaRegistro().toString(),
+              domicilioResponseDto);
       return pacienteResponseDto;
     } catch (SQLException e) {
       rollBackCommit(conn, e);
@@ -131,7 +136,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
 
   @Override
   public PacienteResponseDto updatePaciente(String dni, PacienteRequestDto paciente) {
-    if (dni == null || paciente == null) {
+    if (dni == null || paciente == null || paciente.getDomicilio() == null) {
       return null;
     }
     Connection conn = null;
@@ -160,19 +165,22 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
       ((PacienteDaoH2) pacienteIDao).update(conn, createdPaciente.getDni(), createdPaciente);
       conn.commit();
 
-      Paciente getPacienteUpdated = pacienteIDao.readOne(dni);
+      Paciente getUpdatedPaciente = pacienteIDao.readOne(dni);
+      if (getUpdatedPaciente == null) {
+        return null;
+      }
       DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-              getPacienteUpdated.getDomicilio().getId(),
-              getPacienteUpdated.getDomicilio().getCalle(),
-              getPacienteUpdated.getDomicilio().getNumero(),
-              getPacienteUpdated.getDomicilio().getLocalidad(),
-              getPacienteUpdated.getDomicilio().getCiudad());
+              getUpdatedPaciente.getDomicilio().getId(),
+              getUpdatedPaciente.getDomicilio().getCalle(),
+              getUpdatedPaciente.getDomicilio().getNumero(),
+              getUpdatedPaciente.getDomicilio().getLocalidad(),
+              getUpdatedPaciente.getDomicilio().getCiudad());
       PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
-              getPacienteUpdated.getId(),
-              getPacienteUpdated.getNombre(),
-              getPacienteUpdated.getApellido(),
-              getPacienteUpdated.getDni(),
-              getPacienteUpdated.getFechaRegistro().toString(),
+              getUpdatedPaciente.getId(),
+              getUpdatedPaciente.getNombre(),
+              getUpdatedPaciente.getApellido(),
+              getUpdatedPaciente.getDni(),
+              getUpdatedPaciente.getFechaRegistro().toString(),
               domicilioResponseDto);
       return pacienteResponseDto;
     } catch (SQLException e) {
@@ -186,10 +194,10 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
 
   @Override
   public boolean deletePaciente(String dni) {
-    if (dni != null) {
-      return pacienteIDao.delete(dni);
+    if (dni == null) {
+      return false;
     }
-    return false;
+    return pacienteIDao.delete(dni);
   }
 
   public void rollBackCommit(Connection conn, SQLException e) {

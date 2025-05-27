@@ -2,7 +2,8 @@ package com.backend.clinica.service;
 
 import com.backend.clinica.dao.impl.OdontologoDaoH2;
 import com.backend.clinica.db.H2Connection;
-import com.backend.clinica.model.Odontologo;
+import com.backend.clinica.dto.request.OdontologoRequestDto;
+import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.service.impl.OdontologoService;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -25,20 +26,20 @@ class OdontologoServiceTest {
   @DisplayName("Agregar un odontólogo")
   void insertarOdontologo() {
     // Crear un nuevo odontologo
-    Odontologo odontologoCreado = new Odontologo("OD00129", "Camilo", "Perez");
-    Odontologo resOdontologo = odontologoService.createOdontologo(odontologoCreado);
+    OdontologoRequestDto odontologoCreado = new OdontologoRequestDto("OD00129", "Camilo", "Perez");
+    OdontologoResponseDto resOdontologo = odontologoService.createOdontologo(odontologoCreado);
     assertNotNull(resOdontologo, "El odontólogo debería haberse creado");
     assertNotNull(resOdontologo.getId(), "El odontólogo debería tener un ID asignado");
 
     // Verificar que se puede recuperar por matricula
-    Odontologo odontologoRecuperado = odontologoService.getOdontologoByCodigo("OD00129");
+    OdontologoResponseDto odontologoRecuperado = odontologoService.getOdontologoByCodigo("OD00129");
     assertNotNull(odontologoRecuperado, "Se debería poder recuperar el odontólogo por Código");
   }
 
   @Test
   @DisplayName("Buscar odontólogo por Código")
   void testGetPacienteByDni() {
-    Odontologo odontologoObtenido = odontologoService.getOdontologoByCodigo("OD00127");
+    OdontologoResponseDto odontologoObtenido = odontologoService.getOdontologoByCodigo("OD00127");
     assertNotNull(odontologoObtenido, "El odontólogo debería existir");
     assertEquals("María", odontologoObtenido.getNombre(), "El nombre debe coincidir");
     assertEquals("López", odontologoObtenido.getApellido(), "El apellido debe coincidir");
@@ -47,7 +48,7 @@ class OdontologoServiceTest {
   @Test
   @DisplayName("Listar todos los odontólogos")
   void obtenerOdontologos() {
-    List<Odontologo> listaObtenida = odontologoService.getAllOdontologos();
+    List<OdontologoResponseDto> listaObtenida = odontologoService.getAllOdontologos();
     assertEquals(7, listaObtenida.size());
 
     assertNotNull(listaObtenida, "La lista no debería ser nula");
@@ -58,7 +59,7 @@ class OdontologoServiceTest {
   @DisplayName("Actualizar información de un odontólogo")
   void testUpdateOdontólogo() {
     // Obtener un odontólogo existente
-    Odontologo odontologoOriginal = odontologoService.getOdontologoByCodigo("OD00125");
+    OdontologoResponseDto odontologoOriginal = odontologoService.getOdontologoByCodigo("OD00125");
     assertNotNull(odontologoOriginal, "El odontólogo debería existir");
 
     // Cambiar algunos datos
@@ -66,14 +67,13 @@ class OdontologoServiceTest {
     String nuevoApellido = "Simpson nuevo";
 
     // Crear odontólogo con datos actualizados
-    Odontologo odontologoActualizado = new Odontologo(
+    OdontologoRequestDto odontologoActualizado = new OdontologoRequestDto(
             odontologoOriginal.getCodigo(),
             nuevoNombre,
-            nuevoApellido
-    );
+            nuevoApellido);
 
     // Actualizar odontólogo
-    Odontologo resultado = odontologoService.updateOdontologo("OD00125", odontologoActualizado);
+    OdontologoResponseDto resultado = odontologoService.updateOdontologo("OD00125", odontologoActualizado);
 
     // Verificar actualización
     assertNotNull(resultado, "El resultado no debería ser nulo");
@@ -82,7 +82,7 @@ class OdontologoServiceTest {
     assertEquals(odontologoOriginal.getCodigo(), resultado.getCodigo(), "El Código debería seguir siendo el mismo");
 
     // Verificar recuperando el paciente otra vez
-    Odontologo verificacion = odontologoService.getOdontologoByCodigo("OD00125");
+    OdontologoResponseDto verificacion = odontologoService.getOdontologoByCodigo("OD00125");
     assertEquals(nuevoNombre, verificacion.getNombre(), "El nombre debería seguir actualizado");
   }
 
@@ -90,7 +90,7 @@ class OdontologoServiceTest {
   @DisplayName("Eliminar un odontólogo")
   void testDeletePaciente() {
     // Verificar que existe
-    Odontologo verificacionExistencia = odontologoService.getOdontologoByCodigo("OD00125");
+    OdontologoResponseDto verificacionExistencia = odontologoService.getOdontologoByCodigo("OD00125");
     assertNotNull(verificacionExistencia, "El odontólogo debería existir antes de eliminarlo");
 
     // Eliminar odontólogo
@@ -98,7 +98,7 @@ class OdontologoServiceTest {
     assertTrue(resultado, "La eliminación debería ser exitosa");
 
     // Verificar que ya no se puede recuperar
-    Odontologo verificacionEliminacion = odontologoService.getOdontologoByCodigo("OD00125");
+    OdontologoResponseDto verificacionEliminacion = odontologoService.getOdontologoByCodigo("OD00125");
     assertNull(verificacionEliminacion, "El odontólogo no debería existir después de eliminarlo");
   }
 
@@ -106,11 +106,11 @@ class OdontologoServiceTest {
   @DisplayName("Probar manejo de errores con entradas inválidas")
   void testErrorHandling() {
     // Buscar odontólogo con Matrícula null
-    Odontologo odontologoNulo = odontologoService.getOdontologoByCodigo(null);
+    OdontologoResponseDto odontologoNulo = odontologoService.getOdontologoByCodigo(null);
     assertNull(odontologoNulo, "Un Código nulo debería devolver null");
 
     // Buscar odontólogo con Matrícula inexistente
-    Odontologo odontologoInexistente = odontologoService.getOdontologoByCodigo("00000000");
+    OdontologoResponseDto odontologoInexistente = odontologoService.getOdontologoByCodigo("00000000");
     assertNull(odontologoInexistente, "Un Código inexistente debería devolver null");
   }
 }

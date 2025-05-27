@@ -2,14 +2,14 @@ package com.backend.clinica.service;
 
 import java.util.List;
 
-public interface IOdontologoService<TypeO, O> {
-  O createOdontologo(O o);
+public interface IOdontologoService<Type, Request, Response> {
+  Response createOdontologo(Request t);
 
-  O getOdontologoByCodigo(TypeO codigo);
+  Response getOdontologoByCodigo(Type codigo);
 
-  List<O> getAllOdontologos();
+  List<Response> getAllOdontologos();
 
-  O updateOdontologo(TypeO codigo, O o);
+  Response updateOdontologo(Type codigo, Request t);
 
-  boolean deleteOdontologo(TypeO codigo);
+  boolean deleteOdontologo(Type codigo);
 }
