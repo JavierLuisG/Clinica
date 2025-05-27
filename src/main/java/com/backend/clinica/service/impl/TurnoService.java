@@ -44,10 +44,13 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
             odontologo,
             paciente);
     Turno saved = turnoIDao.create(created);
-    if (saved.getId() == null) {
+    if (saved == null) {
       return null;
     }
     Turno getSaveTurno = turnoIDao.readOne(saved.getId());
+    if (getSaveTurno == null) {
+      return null;
+    }
     return mapToDto(getSaveTurno);
   }
 
@@ -98,6 +101,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
       return null;
     }
     Turno getUpdatedTurno = turnoIDao.readOne(updated.getId());
+    if (getUpdatedTurno == null) {
+      return null;
+    }
     return mapToDto(getUpdatedTurno);
   }
 

@@ -35,12 +35,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     if (getSaveOdontologo == null) {
       return null;
     }
-    OdontologoResponseDto odontologoResponseDto = new OdontologoResponseDto(
-            getSaveOdontologo.getId(),
-            getSaveOdontologo.getCodigo(),
-            getSaveOdontologo.getNombre(),
-            getSaveOdontologo.getApellido());
-    return odontologoResponseDto;
+    return mapToDto(getSaveOdontologo);
   }
 
   @Override
@@ -52,12 +47,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     if (getOdontologo == null) {
       return null;
     }
-    OdontologoResponseDto odontologoResponseDto = new OdontologoResponseDto(
-            getOdontologo.getId(),
-            getOdontologo.getCodigo(),
-            getOdontologo.getNombre(),
-            getOdontologo.getApellido());
-    return odontologoResponseDto;
+    return mapToDto(getOdontologo);
   }
 
   @Override
@@ -68,11 +58,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
       return null;
     }
     for (Odontologo odontologo : odontologoList) {
-      odontologoResponseDtoList.add(new OdontologoResponseDto(
-              odontologo.getId(),
-              odontologo.getCodigo(),
-              odontologo.getNombre(),
-              odontologo.getApellido()));
+      odontologoResponseDtoList.add(mapToDto(odontologo));
     }
     return odontologoResponseDtoList;
   }
@@ -99,12 +85,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     if (getUpdatedOdontologo == null) {
       return null;
     }
-    OdontologoResponseDto odontologoResponseDto = new OdontologoResponseDto(
-            getUpdatedOdontologo.getId(),
-            getUpdatedOdontologo.getCodigo(),
-            getUpdatedOdontologo.getNombre(),
-            getUpdatedOdontologo.getApellido());
-    return odontologoResponseDto;
+    return mapToDto(getUpdatedOdontologo);
   }
 
   @Override
@@ -113,5 +94,13 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
       return false;
     }
     return odontologoIDao.delete(codigo);
+  }
+
+  private OdontologoResponseDto mapToDto(Odontologo odontologo) {
+    return new OdontologoResponseDto(
+            odontologo.getId(),
+            odontologo.getCodigo(),
+            odontologo.getNombre(),
+            odontologo.getApellido());
   }
 }
