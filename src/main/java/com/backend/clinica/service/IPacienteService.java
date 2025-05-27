@@ -2,15 +2,15 @@ package com.backend.clinica.service;
 
 import java.util.List;
 
-public interface IPacienteService<TypeP, P> {
+public interface IPacienteService<Type, Request, Response> {
 
-  P createPaciente(P p);
+  Response createPaciente(Request p);
 
-  P getPacienteByDni(TypeP dni);
+  Response getPacienteByDni(Type dni);
 
-  List<P> getAllPacientes();
+  List<Response> getAllPacientes();
 
-  P updatePaciente(TypeP dni, P p);
+  Response updatePaciente(Type dni, Request p);
 
-  boolean deletePaciente(TypeP dni);
+  boolean deletePaciente(Type dni);
 }

@@ -67,6 +67,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   public List<TurnoResponseDto> getAllTurnos() {
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoIDao.readAll();
+    if (turnoList.isEmpty()) {
+      return null;
+    }
     for (Turno turno : turnoList) {
       turnoResponseDtoList.add(mapToDto(turno));
     }
@@ -124,6 +127,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
             paciente.getNombre(),
             paciente.getApellido(),
             paciente.getDni(),
+            paciente.getFechaRegistro().toString(),
             mapToDto(paciente.getDomicilio()));
   }
 

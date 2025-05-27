@@ -1,4 +1,4 @@
-package com.backend.clinica.dto.response;
+package com.backend.clinica.dto.request;
 
 import lombok.*;
 
@@ -7,11 +7,10 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
-public class PacienteResponseDto {
-  private Integer id;
+public class PacienteRequestDto {
   private String nombre;
   private String apellido;
   private String dni;
   private String fechaRegistro;
-  private DomicilioResponseDto domicilioResponseDto;
+  private DomicilioRequestDto domicilio;
 }

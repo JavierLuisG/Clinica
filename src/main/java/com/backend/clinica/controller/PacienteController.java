@@ -1,6 +1,7 @@
 package com.backend.clinica.controller;
 
-import com.backend.clinica.model.Paciente;
+import com.backend.clinica.dto.request.PacienteRequestDto;
+import com.backend.clinica.dto.response.PacienteResponseDto;
 import com.backend.clinica.service.IPacienteService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,18 +12,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/paciente")
 public class PacienteController {
-  private final IPacienteService<String, Paciente> iPacienteService;
+  private final IPacienteService<String, PacienteRequestDto, PacienteResponseDto> iPacienteService;
 
-  public PacienteController(IPacienteService<String, Paciente> iPacienteService) {
+  public PacienteController(IPacienteService<String, PacienteRequestDto, PacienteResponseDto> iPacienteService) {
     this.iPacienteService = iPacienteService;
   }
 
   @PostMapping
-  public ResponseEntity<Paciente> postPaciente(@RequestBody Paciente paciente) {
+  public ResponseEntity<PacienteResponseDto> postPaciente(@RequestBody PacienteRequestDto paciente) {
     if (paciente == null || paciente.getDomicilio() == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    Paciente createPaciente = iPacienteService.createPaciente(paciente);
+    PacienteResponseDto createPaciente = iPacienteService.createPaciente(paciente);
     if (createPaciente == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -30,11 +31,11 @@ public class PacienteController {
   }
 
   @GetMapping("/{dni}")
-  public ResponseEntity<Paciente> getPaciente(@PathVariable String dni) {
+  public ResponseEntity<PacienteResponseDto> getPaciente(@PathVariable String dni) {
     if (dni == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    Paciente paciente = iPacienteService.getPacienteByDni(dni);
+    PacienteResponseDto paciente = iPacienteService.getPacienteByDni(dni);
     if (paciente == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
@@ -42,8 +43,8 @@ public class PacienteController {
   }
 
   @GetMapping
-  public ResponseEntity<List<Paciente>> getAllPacientes() {
-    List<Paciente> pacienteList = iPacienteService.getAllPacientes();
+  public ResponseEntity<List<PacienteResponseDto>> getAllPacientes() {
+    List<PacienteResponseDto> pacienteList = iPacienteService.getAllPacientes();
     if (pacienteList.isEmpty()) {
       return ResponseEntity.noContent().build();
     }
@@ -51,11 +52,11 @@ public class PacienteController {
   }
 
   @PutMapping("/{dni}")
-  public ResponseEntity<Paciente> putPaciente(@PathVariable String dni, @RequestBody Paciente paciente) {
+  public ResponseEntity<PacienteResponseDto> putPaciente(@PathVariable String dni, @RequestBody PacienteRequestDto paciente) {
     if (dni == null || paciente == null || paciente.getDomicilio() == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    Paciente updatePaciente = iPacienteService.updatePaciente(dni, paciente);
+    PacienteResponseDto updatePaciente = iPacienteService.updatePaciente(dni, paciente);
     if (updatePaciente == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }

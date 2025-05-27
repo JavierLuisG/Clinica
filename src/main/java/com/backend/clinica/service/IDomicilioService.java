@@ -2,14 +2,14 @@ package com.backend.clinica.service;
 
 import java.util.List;
 
-public interface IDomicilioService<TypeD, D> {
-  D createDomicilio(D d);
+public interface IDomicilioService<Type, Request, Response> {
+  Response createDomicilio(Request d);
 
-  D getDomicilioById(TypeD id);
+  Response getDomicilioById(Type id);
 
-  List<D> getAllDomicilios();
+  List<Response> getAllDomicilios();
 
-  D updateDomicilio(TypeD id, D d);
+  Response updateDomicilio(Type id, Request d);
 
-  boolean deleteDomicilio(TypeD id);
+  boolean deleteDomicilio(Type id);
 }
