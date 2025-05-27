@@ -10,6 +10,7 @@ import com.backend.clinica.dto.response.TurnoResponseDto;
 import com.backend.clinica.service.impl.OdontologoService;
 import com.backend.clinica.service.impl.TurnoService;
 import org.junit.jupiter.api.*;
+import org.modelmapper.ModelMapper;
 
 import java.util.List;
 
@@ -22,7 +23,8 @@ public class TurnoServiceTest {
   @BeforeAll
   static void setUp() {
     H2Connection.createTable();
-    turnoService = new TurnoService(new TurnoDaoH2(), new OdontologoDaoH2(), new PacienteDaoH2());
+    ModelMapper modelMapper = new ModelMapper();
+    turnoService = new TurnoService(new TurnoDaoH2(), new OdontologoDaoH2(), new PacienteDaoH2(), modelMapper);
     odontologoService = new OdontologoService(new OdontologoDaoH2());
   }
 

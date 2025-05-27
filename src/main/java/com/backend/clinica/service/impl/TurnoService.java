@@ -11,6 +11,7 @@ import com.backend.clinica.model.Odontologo;
 import com.backend.clinica.model.Paciente;
 import com.backend.clinica.model.Turno;
 import com.backend.clinica.service.ITurnoService;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,11 +23,13 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   private final IDao<Integer, Turno> turnoIDao;
   private final IDao<String, Odontologo> odontologoIDao;
   private final IDao<String, Paciente> pacienteIDao;
+  private final ModelMapper modelMapper;
 
-  public TurnoService(IDao<Integer, Turno> turnoIDao, IDao<String, Odontologo> odontologoIDao, IDao<String, Paciente> pacienteIDao) {
+  public TurnoService(IDao<Integer, Turno> turnoIDao, IDao<String, Odontologo> odontologoIDao, IDao<String, Paciente> pacienteIDao, ModelMapper modelMapper) {
     this.turnoIDao = turnoIDao;
     this.odontologoIDao = odontologoIDao;
     this.pacienteIDao = pacienteIDao;
+    this.modelMapper = modelMapper;
   }
 
   @Override
@@ -51,7 +54,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     if (getSaveTurno == null) {
       return null;
     }
-    return mapToDto(getSaveTurno);
+    return mapToResponseDto(getSaveTurno);
   }
 
   @Override
@@ -63,7 +66,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     if (getTurno == null) {
       return null;
     }
-    return mapToDto(getTurno);
+    return mapToResponseDto(getTurno);
   }
 
   @Override
@@ -74,7 +77,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
       return null;
     }
     for (Turno turno : turnoList) {
-      turnoResponseDtoList.add(mapToDto(turno));
+      turnoResponseDtoList.add(mapToResponseDto(turno));
     }
     return turnoResponseDtoList;
   }
@@ -104,7 +107,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     if (getUpdatedTurno == null) {
       return null;
     }
-    return mapToDto(getUpdatedTurno);
+    return mapToResponseDto(getUpdatedTurno);
   }
 
   @Override
@@ -115,38 +118,10 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     return turnoIDao.delete(id);
   }
 
-  private TurnoResponseDto mapToDto(Turno turno) {
-    return new TurnoResponseDto(
-            turno.getId(),
-            turno.getFechaConsulta().toString(),
-            mapToDto(turno.getOdontologo()),
-            mapToDto(turno.getPaciente()));
-  }
-
-  private OdontologoResponseDto mapToDto(Odontologo odontologo) {
-    return new OdontologoResponseDto(
-            odontologo.getId(),
-            odontologo.getCodigo(),
-            odontologo.getNombre(),
-            odontologo.getApellido());
-  }
-
-  private PacienteResponseDto mapToDto(Paciente paciente) {
-    return new PacienteResponseDto(
-            paciente.getId(),
-            paciente.getNombre(),
-            paciente.getApellido(),
-            paciente.getDni(),
-            paciente.getFechaRegistro().toString(),
-            mapToDto(paciente.getDomicilio()));
-  }
-
-  private DomicilioResponseDto mapToDto(Domicilio domicilio) {
-    return new DomicilioResponseDto(
-            domicilio.getId(),
-            domicilio.getCalle(),
-            domicilio.getNumero(),
-            domicilio.getLocalidad(),
-            domicilio.getCiudad());
+  private TurnoResponseDto mapToResponseDto(Turno turno) {
+    TurnoResponseDto turnoResponseDto = modelMapper.map(turno, TurnoResponseDto.class);
+    turnoResponseDto.setOdontologoResponseDto(modelMapper.map(turno.getOdontologo(), OdontologoResponseDto.class));
+    turnoResponseDto.setPacienteResponseDto(modelMapper.map(turno.getPaciente(), PacienteResponseDto.class));
+    return turnoResponseDto;
   }
 }
