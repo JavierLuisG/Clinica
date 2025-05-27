@@ -61,20 +61,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
       if (getSavePaciente == null) {
         return null;
       }
-      DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-              getSavePaciente.getDomicilio().getId(),
-              getSavePaciente.getDomicilio().getCalle(),
-              getSavePaciente.getDomicilio().getNumero(),
-              getSavePaciente.getDomicilio().getLocalidad(),
-              getSavePaciente.getDomicilio().getCiudad());
-      PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
-              getSavePaciente.getId(),
-              getSavePaciente.getNombre(),
-              getSavePaciente.getApellido(),
-              getSavePaciente.getDni(),
-              getSavePaciente.getFechaRegistro().toString(),
-              domicilioResponseDto);
-      return pacienteResponseDto;
+      return mapToDto(getSavePaciente);
     } catch (SQLException e) {
       rollBackCommit(conn, e);
       LOGGER.error("Error al insertar paciente con domicilio: " + e);
@@ -89,24 +76,11 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
     if (dni == null) {
       return null;
     }
-    Paciente paciente = pacienteIDao.readOne(dni);
-    if (paciente == null) {
+    Paciente getPaciente = pacienteIDao.readOne(dni);
+    if (getPaciente == null) {
       return null;
     }
-    DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            paciente.getDomicilio().getId(),
-            paciente.getDomicilio().getCalle(),
-            paciente.getDomicilio().getNumero(),
-            paciente.getDomicilio().getLocalidad(),
-            paciente.getDomicilio().getCiudad());
-    PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
-            paciente.getId(),
-            paciente.getNombre(),
-            paciente.getApellido(),
-            paciente.getDni(),
-            paciente.getFechaRegistro().toString(),
-            domicilioResponseDto);
-    return pacienteResponseDto;
+    return mapToDto(getPaciente);
   }
 
   @Override
@@ -117,19 +91,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
       return null;
     }
     for (Paciente paciente : pacienteList) {
-      DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-              paciente.getDomicilio().getId(),
-              paciente.getDomicilio().getCalle(),
-              paciente.getDomicilio().getNumero(),
-              paciente.getDomicilio().getLocalidad(),
-              paciente.getDomicilio().getCiudad());
-      pacienteResponseDtoList.add(new PacienteResponseDto(
-              paciente.getId(),
-              paciente.getNombre(),
-              paciente.getApellido(),
-              paciente.getDni(),
-              paciente.getFechaRegistro().toString(),
-              domicilioResponseDto));
+      pacienteResponseDtoList.add(mapToDto(paciente));
     }
     return pacienteResponseDtoList;
   }
@@ -169,20 +131,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
       if (getUpdatedPaciente == null) {
         return null;
       }
-      DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-              getUpdatedPaciente.getDomicilio().getId(),
-              getUpdatedPaciente.getDomicilio().getCalle(),
-              getUpdatedPaciente.getDomicilio().getNumero(),
-              getUpdatedPaciente.getDomicilio().getLocalidad(),
-              getUpdatedPaciente.getDomicilio().getCiudad());
-      PacienteResponseDto pacienteResponseDto = new PacienteResponseDto(
-              getUpdatedPaciente.getId(),
-              getUpdatedPaciente.getNombre(),
-              getUpdatedPaciente.getApellido(),
-              getUpdatedPaciente.getDni(),
-              getUpdatedPaciente.getFechaRegistro().toString(),
-              domicilioResponseDto);
-      return pacienteResponseDto;
+      return mapToDto(getUpdatedPaciente);
     } catch (SQLException e) {
       rollBackCommit(conn, e);
       LOGGER.error("Error al insertar paciente con domicilio: " + e);
@@ -198,6 +147,25 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
       return false;
     }
     return pacienteIDao.delete(dni);
+  }
+
+  private DomicilioResponseDto mapToDto(Domicilio domicilio) {
+    return new DomicilioResponseDto(
+            domicilio.getId(),
+            domicilio.getCalle(),
+            domicilio.getNumero(),
+            domicilio.getLocalidad(),
+            domicilio.getCiudad());
+  }
+
+  private PacienteResponseDto mapToDto(Paciente paciente) {
+    return new PacienteResponseDto(
+            paciente.getId(),
+            paciente.getNombre(),
+            paciente.getApellido(),
+            paciente.getDni(),
+            paciente.getFechaRegistro().toString(),
+            mapToDto(paciente.getDomicilio()));
   }
 
   public void rollBackCommit(Connection conn, SQLException e) {

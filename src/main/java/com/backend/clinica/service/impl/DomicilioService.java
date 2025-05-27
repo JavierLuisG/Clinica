@@ -36,14 +36,7 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
     if (getSaveDomicilio == null) {
       return null;
     }
-    DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            getSaveDomicilio.getId(),
-            getSaveDomicilio.getCalle(),
-            getSaveDomicilio.getNumero(),
-            getSaveDomicilio.getLocalidad(),
-            getSaveDomicilio.getCiudad()
-    );
-    return domicilioResponseDto;
+    return mapToDto(getSaveDomicilio);
   }
 
   @Override
@@ -55,14 +48,7 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
     if (getDomicilio == null) {
       return null;
     }
-    DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            getDomicilio.getId(),
-            getDomicilio.getCalle(),
-            getDomicilio.getNumero(),
-            getDomicilio.getLocalidad(),
-            getDomicilio.getCiudad()
-    );
-    return domicilioResponseDto;
+    return mapToDto(getDomicilio);
   }
 
   @Override
@@ -73,12 +59,7 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
       return null;
     }
     for (Domicilio domicilio : domicilioList) {
-      domicilioResponseDtoList.add(new DomicilioResponseDto(
-              domicilio.getId(),
-              domicilio.getCalle(),
-              domicilio.getNumero(),
-              domicilio.getLocalidad(),
-              domicilio.getCiudad()));
+      domicilioResponseDtoList.add(mapToDto(domicilio));
     }
     return domicilioResponseDtoList;
   }
@@ -106,13 +87,7 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
     if (getUpdatedDomicilio == null) {
       return null;
     }
-    DomicilioResponseDto domicilioResponseDto = new DomicilioResponseDto(
-            getUpdatedDomicilio.getId(),
-            getUpdatedDomicilio.getCalle(),
-            getUpdatedDomicilio.getNumero(),
-            getUpdatedDomicilio.getLocalidad(),
-            getUpdatedDomicilio.getCiudad());
-    return domicilioResponseDto;
+    return mapToDto(getUpdatedDomicilio);
   }
 
   @Override
@@ -121,5 +96,14 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
       return false;
     }
     return domicilioIDao.delete(id);
+  }
+
+  private DomicilioResponseDto mapToDto(Domicilio domicilio) {
+    return new DomicilioResponseDto(
+            domicilio.getId(),
+            domicilio.getCalle(),
+            domicilio.getNumero(),
+            domicilio.getLocalidad(),
+            domicilio.getCiudad());
   }
 }
