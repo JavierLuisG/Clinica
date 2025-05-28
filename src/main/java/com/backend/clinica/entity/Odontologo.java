@@ -1,13 +1,17 @@
 package com.backend.clinica.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 
+@Entity
+@Table(name = "odontologos")
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
 public class Odontologo {
-
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
   private String codigo;
   private String nombre;
