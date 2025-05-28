@@ -2,10 +2,10 @@ package com.backend.clinica.dao.impl;
 
 import com.backend.clinica.dao.IDao;
 import com.backend.clinica.db.H2Connection;
-import com.backend.clinica.model.Domicilio;
-import com.backend.clinica.model.Odontologo;
-import com.backend.clinica.model.Paciente;
-import com.backend.clinica.model.Turno;
+import com.backend.clinica.entity.Domicilio;
+import com.backend.clinica.entity.Odontologo;
+import com.backend.clinica.entity.Paciente;
+import com.backend.clinica.entity.Turno;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

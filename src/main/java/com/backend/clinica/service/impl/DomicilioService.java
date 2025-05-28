@@ -3,7 +3,7 @@ package com.backend.clinica.service.impl;
 import com.backend.clinica.dao.IDao;
 import com.backend.clinica.dto.request.DomicilioRequestDto;
 import com.backend.clinica.dto.response.DomicilioResponseDto;
-import com.backend.clinica.model.Domicilio;
+import com.backend.clinica.entity.Domicilio;
 import com.backend.clinica.service.IDomicilioService;
 import org.springframework.stereotype.Service;
 

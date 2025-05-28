@@ -2,14 +2,12 @@ package com.backend.clinica.service.impl;
 
 import com.backend.clinica.dao.IDao;
 import com.backend.clinica.dto.request.TurnoRequestDto;
-import com.backend.clinica.dto.response.DomicilioResponseDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.dto.response.PacienteResponseDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
-import com.backend.clinica.model.Domicilio;
-import com.backend.clinica.model.Odontologo;
-import com.backend.clinica.model.Paciente;
-import com.backend.clinica.model.Turno;
+import com.backend.clinica.entity.Odontologo;
+import com.backend.clinica.entity.Paciente;
+import com.backend.clinica.entity.Turno;
 import com.backend.clinica.service.ITurnoService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;

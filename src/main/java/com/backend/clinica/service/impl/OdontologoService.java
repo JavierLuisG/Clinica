@@ -3,7 +3,7 @@ package com.backend.clinica.service.impl;
 import com.backend.clinica.dao.IDao;
 import com.backend.clinica.dto.request.OdontologoRequestDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
-import com.backend.clinica.model.Odontologo;
+import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.service.IOdontologoService;
 import org.springframework.stereotype.Service;
 

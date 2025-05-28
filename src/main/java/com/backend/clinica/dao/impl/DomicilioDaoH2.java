@@ -2,7 +2,7 @@ package com.backend.clinica.dao.impl;
 
 import com.backend.clinica.dao.IDao;
 import com.backend.clinica.db.H2Connection;
-import com.backend.clinica.model.Domicilio;
+import com.backend.clinica.entity.Domicilio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
