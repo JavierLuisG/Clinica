@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -16,11 +16,11 @@ public class Paciente {
   private String nombre;
   private String apellido;
   private String dni;
-  private LocalDate fechaRegistro;
+  private LocalDateTime fechaRegistro;
   private Domicilio domicilio;
   private boolean state = true;
 
-  public Paciente(Integer id, String nombre, String apellido, String dni, LocalDate fechaRegistro, Domicilio domicilio) {
+  public Paciente(Integer id, String nombre, String apellido, String dni, LocalDateTime fechaRegistro, Domicilio domicilio) {
     this.id = id;
     this.nombre = nombre;
     this.apellido = apellido;
@@ -29,7 +29,7 @@ public class Paciente {
     this.domicilio = domicilio;
   }
 
-  public Paciente(String nombre, String apellido, String dni, LocalDate fechaRegistro, Domicilio domicilio) {
+  public Paciente(String nombre, String apellido, String dni, LocalDateTime fechaRegistro, Domicilio domicilio) {
     this.nombre = nombre;
     this.apellido = apellido;
     this.dni = dni;

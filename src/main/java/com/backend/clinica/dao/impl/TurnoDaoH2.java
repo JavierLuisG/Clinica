@@ -54,7 +54,7 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
       conn = H2Connection.getConnection();
       conn.setAutoCommit(false);
       try (PreparedStatement ps = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
-        ps.setDate(1, Date.valueOf(turno.getFechaConsulta()));
+        ps.setTimestamp(1, Timestamp.valueOf(turno.getFechaConsulta()));
         ps.setInt(2, turno.getOdontologo().getId());
         ps.setInt(3, turno.getPaciente().getId());
 
@@ -102,7 +102,7 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
                   rs.getString("PACIENTE_NOMBRE"),
                   rs.getString("PACIENTE_APELLIDO"),
                   rs.getString("DNI"),
-                  rs.getDate("FECHA_REGISTRO").toLocalDate(),
+                  rs.getTimestamp("FECHA_REGISTRO").toLocalDateTime(),
                   getDomicilio);
           Odontologo getOdontologo = new Odontologo(
                   rs.getInt("ODONTOLOGO_ID"),
@@ -111,7 +111,7 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
                   rs.getString("ODONTOLOGO_APELLIDO"));
           responseTurno = new Turno(
                   rs.getInt("TURNO_ID"),
-                  rs.getDate("FECHA_CONSULTA").toLocalDate(),
+                  rs.getTimestamp("FECHA_CONSULTA").toLocalDateTime(),
                   getOdontologo,
                   getPaciente);
           LOGGER.info("Seleccionado: " + responseTurno);
@@ -143,7 +143,7 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
                 rs.getString("PACIENTE_NOMBRE"),
                 rs.getString("PACIENTE_APELLIDO"),
                 rs.getString("DNI"),
-                rs.getDate("FECHA_REGISTRO").toLocalDate(),
+                rs.getTimestamp("FECHA_REGISTRO").toLocalDateTime(),
                 getDomicilio);
         Odontologo getOdontologo = new Odontologo(
                 rs.getInt("ODONTOLOGO_ID"),
@@ -152,7 +152,7 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
                 rs.getString("APELLIDO"));
         Turno getTurno = new Turno(
                 rs.getInt("TURNO_ID"),
-                rs.getDate("FECHA_CONSULTA").toLocalDate(),
+                rs.getTimestamp("FECHA_CONSULTA").toLocalDateTime(),
                 getOdontologo,
                 getPaciente);
         listResponseTurnos.add(getTurno);
@@ -174,7 +174,7 @@ public class TurnoDaoH2 implements IDao<Integer, Turno> {
       conn.setAutoCommit(false);
 
       try (PreparedStatement ps = conn.prepareStatement(UPDATE)) {
-        ps.setDate(1, Date.valueOf(turno.getFechaConsulta()));
+        ps.setTimestamp(1, Timestamp.valueOf(turno.getFechaConsulta()));
         ps.setInt(2, turno.getOdontologo().getId());
         ps.setInt(3, turno.getPaciente().getId());
         ps.setInt(4, id);

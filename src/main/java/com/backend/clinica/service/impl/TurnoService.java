@@ -12,7 +12,7 @@ import com.backend.clinica.service.ITurnoService;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
       return null;
     }
     Turno created = new Turno(
-            LocalDate.parse(turno.getFechaConsulta()),
+            LocalDateTime.parse(turno.getFechaConsulta()),
             odontologo,
             paciente);
     Turno saved = turnoIDao.create(created);
@@ -93,7 +93,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     }
     Turno created = new Turno(
             getTurno.getId(),
-            LocalDate.parse(turno.getFechaConsulta()),
+            LocalDateTime.parse(turno.getFechaConsulta()),
             odontologo,
             paciente
     );

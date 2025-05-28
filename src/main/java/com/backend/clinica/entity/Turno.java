@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -13,19 +13,19 @@ import java.time.LocalDate;
 @ToString
 public class Turno {
   private Integer id;
-  private LocalDate fechaConsulta;
+  private LocalDateTime fechaConsulta;
   private Odontologo odontologo;
   private Paciente paciente;
   private boolean state = true;
 
-  public Turno(Integer id, LocalDate fechaConsulta, Odontologo odontologo, Paciente paciente) {
+  public Turno(Integer id, LocalDateTime fechaConsulta, Odontologo odontologo, Paciente paciente) {
     this.id = id;
     this.fechaConsulta = fechaConsulta;
     this.odontologo = odontologo;
     this.paciente = paciente;
   }
 
-  public Turno(LocalDate fechaConsulta, Odontologo odontologo, Paciente paciente) {
+  public Turno(LocalDateTime fechaConsulta, Odontologo odontologo, Paciente paciente) {
     this.fechaConsulta = fechaConsulta;
     this.odontologo = odontologo;
     this.paciente = paciente;

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
               paciente.getNombre(),
               paciente.getApellido(),
               paciente.getDni(),
-              LocalDate.parse(paciente.getFechaRegistro()),
+              LocalDateTime.parse(paciente.getFechaRegistro()),
               savedDomicilio);
       Paciente savedPaciente = ((PacienteDaoH2) pacienteIDao).create(conn, createdPaciente);
       conn.commit();
@@ -122,7 +122,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
               paciente.getNombre(),
               paciente.getApellido(),
               paciente.getDni(),
-              LocalDate.parse(paciente.getFechaRegistro()),
+              LocalDateTime.parse(paciente.getFechaRegistro()),
               createdDomicilio);
       ((PacienteDaoH2) pacienteIDao).update(conn, createdPaciente.getDni(), createdPaciente);
       conn.commit();

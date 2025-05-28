@@ -42,7 +42,7 @@ public class PacienteDaoH2 implements IDao<String, Paciente> {
       ps.setString(1, paciente.getNombre());
       ps.setString(2, paciente.getApellido());
       ps.setString(3, paciente.getDni());
-      ps.setDate(4, Date.valueOf(paciente.getFechaRegistro()));
+      ps.setTimestamp(4, Timestamp.valueOf(paciente.getFechaRegistro()));
       ps.setInt(5, paciente.getDomicilio().getId());
 
       if (ps.executeUpdate() > 0) {
@@ -76,7 +76,7 @@ public class PacienteDaoH2 implements IDao<String, Paciente> {
         ps.setString(1, paciente.getNombre());
         ps.setString(2, paciente.getApellido());
         ps.setString(3, paciente.getDni());
-        ps.setDate(4, Date.valueOf(paciente.getFechaRegistro()));
+        ps.setTimestamp(4, Timestamp.valueOf(paciente.getFechaRegistro()));
         ps.setInt(5, paciente.getDomicilio().getId());
 
         if (ps.executeUpdate() > 0) {
@@ -126,7 +126,7 @@ public class PacienteDaoH2 implements IDao<String, Paciente> {
                   rs.getString("NOMBRE"),
                   rs.getString("APELLIDO"),
                   rs.getString("DNI"),
-                  rs.getDate("FECHA_REGISTRO").toLocalDate(),
+                  rs.getTimestamp("FECHA_REGISTRO").toLocalDateTime(),
                   getDomicilio);
           LOGGER.info("Seleccionado: " + responsePaciente);
         }
@@ -157,7 +157,7 @@ public class PacienteDaoH2 implements IDao<String, Paciente> {
                 rs.getString("NOMBRE"),
                 rs.getString("APELLIDO"),
                 rs.getString("DNI"),
-                rs.getDate("FECHA_REGISTRO").toLocalDate(),
+                rs.getTimestamp("FECHA_REGISTRO").toLocalDateTime(),
                 getDomicilio);
         listResponsePacientes.add(getPaciente);
         LOGGER.info(getPaciente.toString());
