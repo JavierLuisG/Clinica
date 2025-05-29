@@ -11,6 +11,7 @@ import com.backend.clinica.service.impl.OdontologoService;
 import com.backend.clinica.service.impl.TurnoService;
 import org.junit.jupiter.api.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class TurnoServiceTest {
   private static TurnoService turnoService;
+  @Autowired
   private static OdontologoService odontologoService;
 
   @BeforeAll
@@ -25,7 +27,6 @@ public class TurnoServiceTest {
     H2Connection.createTable();
     ModelMapper modelMapper = new ModelMapper();
     turnoService = new TurnoService(new TurnoDaoH2(), new OdontologoDaoH2(), new PacienteDaoH2(), modelMapper);
-    odontologoService = new OdontologoService(new OdontologoDaoH2());
   }
 
   @Test

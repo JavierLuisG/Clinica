@@ -1,10 +1,13 @@
 package com.backend.clinica.service.impl;
 
-import com.backend.clinica.dao.IDao;
 import com.backend.clinica.dto.request.OdontologoRequestDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.entity.Odontologo;
+import com.backend.clinica.repository.IOdontologoRepository;
 import com.backend.clinica.service.IOdontologoService;
+import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,51 +15,45 @@ import java.util.List;
 
 @Service
 public class OdontologoService implements IOdontologoService<String, OdontologoRequestDto, OdontologoResponseDto> {
-  private final IDao<String, Odontologo> odontologoIDao;
+  Logger LOGGER = LoggerFactory.getLogger(OdontologoService.class);
+  private final IOdontologoRepository odontologoRepository;
 
-  public OdontologoService(IDao<String, Odontologo> odontologoIDao) {
-    this.odontologoIDao = odontologoIDao;
+  public OdontologoService(IOdontologoRepository odontologoRepository) {
+    this.odontologoRepository = odontologoRepository;
   }
 
   @Override
   public OdontologoResponseDto createOdontologo(OdontologoRequestDto odontologo) {
     if (odontologo == null) {
-      return null;
+      throw new IllegalArgumentException("Datos incompletos");
+    }
+    if (odontologoRepository.findByCodigo(odontologo.getCodigo()).isPresent()) {
+      throw new IllegalArgumentException("Ya existe odontólogo con código: " + odontologo.getCodigo());
     }
     Odontologo created = new Odontologo(
             odontologo.getCodigo(),
             odontologo.getNombre(),
             odontologo.getApellido());
-    Odontologo saved = odontologoIDao.create(created);
-    if (saved == null) {
-      return null;
-    }
-    Odontologo getSaveOdontologo = odontologoIDao.readOne(saved.getCodigo());
-    if (getSaveOdontologo == null) {
-      return null;
-    }
-    return mapToDto(getSaveOdontologo);
+    Odontologo savedOdontologo = odontologoRepository.save(created);
+    LOGGER.info("Odontólogo guardado: {}", savedOdontologo.getId());
+    return mapToDto(savedOdontologo);
   }
 
   @Override
   public OdontologoResponseDto getOdontologoByCodigo(String codigo) {
     if (codigo == null) {
-      return null;
+      throw new IllegalArgumentException("Ingrese código");
     }
-    Odontologo getOdontologo = odontologoIDao.readOne(codigo);
-    if (getOdontologo == null) {
-      return null;
-    }
-    return mapToDto(getOdontologo);
+    Odontologo findOdontologo = odontologoRepository
+            .findByCodigo(codigo)
+            .orElseThrow(() -> new EntityNotFoundException("Odontólogo no encontrado: " + codigo));
+    return mapToDto(findOdontologo);
   }
 
   @Override
   public List<OdontologoResponseDto> getAllOdontologos() {
     List<OdontologoResponseDto> odontologoResponseDtoList = new ArrayList<>();
-    List<Odontologo> odontologoList = odontologoIDao.readAll();
-    if (odontologoList.isEmpty()) {
-      return null;
-    }
+    List<Odontologo> odontologoList = odontologoRepository.findAll();
     for (Odontologo odontologo : odontologoList) {
       odontologoResponseDtoList.add(mapToDto(odontologo));
     }
@@ -66,34 +63,31 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
   @Override
   public OdontologoResponseDto updateOdontologo(String codigo, OdontologoRequestDto odontologo) {
     if (codigo == null || odontologo == null) {
-      return null;
+      throw new IllegalArgumentException("Datos invalidos para actualizar.");
     }
-    Odontologo getOdontologo = odontologoIDao.readOne(codigo);
-    if (getOdontologo == null) {
-      return null;
-    }
-    Odontologo created = new Odontologo(
-            getOdontologo.getId(),
-            odontologo.getCodigo(),
-            odontologo.getNombre(),
-            odontologo.getApellido());
-    Odontologo updated = odontologoIDao.update(codigo, created);
-    if (updated == null) {
-      return null;
-    }
-    Odontologo getUpdatedOdontologo = odontologoIDao.readOne(updated.getCodigo());
-    if (getUpdatedOdontologo == null) {
-      return null;
-    }
-    return mapToDto(getUpdatedOdontologo);
+    Odontologo findOdontologo = odontologoRepository
+            .findByCodigo(codigo)
+            .orElseThrow(() -> new EntityNotFoundException("Odontólogo no encontrado: " + codigo));
+
+    findOdontologo.setNombre(odontologo.getNombre());
+    findOdontologo.setApellido(odontologo.getApellido());
+
+    Odontologo updatedOdontologo = odontologoRepository.save(findOdontologo);
+    LOGGER.info("Odontólogo actualizado: {}", updatedOdontologo.getCodigo());
+    return mapToDto(updatedOdontologo);
   }
 
   @Override
   public boolean deleteOdontologo(String codigo) {
     if (codigo == null) {
-      return false;
+      throw new IllegalArgumentException("Ingrese código.");
     }
-    return odontologoIDao.delete(codigo);
+    return odontologoRepository.findByCodigo(codigo)
+            .map(odontologo -> {
+              odontologoRepository.delete(odontologo);
+              LOGGER.info("Odontólogo eliminado: {}", codigo);
+              return true;
+            }).orElse(false);
   }
 
   private OdontologoResponseDto mapToDto(Odontologo odontologo) {
