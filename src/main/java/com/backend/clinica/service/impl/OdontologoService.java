@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 public class OdontologoService implements IOdontologoService<String, OdontologoRequestDto, OdontologoResponseDto> {
-  Logger LOGGER = LoggerFactory.getLogger(OdontologoService.class);
+  private final Logger LOGGER = LoggerFactory.getLogger(OdontologoService.class);
   private final IOdontologoRepository odontologoRepository;
 
   public OdontologoService(IOdontologoRepository odontologoRepository) {

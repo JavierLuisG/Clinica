@@ -15,7 +15,7 @@ import java.util.List;
 
 @Service
 public class DomicilioService implements IDomicilioService<Integer, DomicilioRequestDto, DomicilioResponseDto> {
-  Logger LOGGER = LoggerFactory.getLogger(OdontologoService.class);
+  private final Logger LOGGER = LoggerFactory.getLogger(DomicilioService.class);
   private final IDomicilioRepository domicilioRepository;
 
   public DomicilioService(IDomicilioRepository domicilioRepository) {

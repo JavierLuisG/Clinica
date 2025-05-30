@@ -30,6 +30,9 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
     if (paciente == null || paciente.getDomicilio() == null) {
       throw new IllegalArgumentException("Datos incompletos.");
     }
+    if (pacienteRepository.findByDni(paciente.getDni()).isPresent()) {
+      throw new IllegalArgumentException("Ya existe odontólogo con código: " + paciente.getDni());
+    }
     Domicilio createdDomicilio = new Domicilio(
             paciente.getDomicilio().getCalle(),
             paciente.getDomicilio().getNumero(),
@@ -51,7 +54,8 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
     if (dni == null) {
       throw new IllegalArgumentException("Ingrese dni.");
     }
-    Paciente findPaciente = pacienteRepository.findByDni(dni)
+    Paciente findPaciente = pacienteRepository
+            .findByDni(dni)
             .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
     return mapToDto(findPaciente);
   }

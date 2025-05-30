@@ -1,6 +1,5 @@
 package com.backend.clinica.service.impl;
 
-import com.backend.clinica.dao.IDao;
 import com.backend.clinica.dto.request.TurnoRequestDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.dto.response.PacienteResponseDto;
@@ -8,8 +7,14 @@ import com.backend.clinica.dto.response.TurnoResponseDto;
 import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.entity.Paciente;
 import com.backend.clinica.entity.Turno;
+import com.backend.clinica.repository.IOdontologoRepository;
+import com.backend.clinica.repository.IPacienteRepository;
+import com.backend.clinica.repository.ITurnoRepository;
 import com.backend.clinica.service.ITurnoService;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,62 +23,49 @@ import java.util.List;
 
 @Service
 public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, TurnoResponseDto> {
-  private final IDao<Integer, Turno> turnoIDao;
-  private final IDao<String, Odontologo> odontologoIDao;
-  private final IDao<String, Paciente> pacienteIDao;
+  private final Logger LOGGER = LoggerFactory.getLogger(TurnoService.class);
+  private final ITurnoRepository turnoRepository;
+  private final IOdontologoRepository odontologoRepository;
+  private final IPacienteRepository pacienteRepository;
   private final ModelMapper modelMapper;
 
-  public TurnoService(IDao<Integer, Turno> turnoIDao, IDao<String, Odontologo> odontologoIDao, IDao<String, Paciente> pacienteIDao, ModelMapper modelMapper) {
-    this.turnoIDao = turnoIDao;
-    this.odontologoIDao = odontologoIDao;
-    this.pacienteIDao = pacienteIDao;
+  public TurnoService(ITurnoRepository turnoRepository, IOdontologoRepository odontologoRepository, IPacienteRepository pacienteRepository, ModelMapper modelMapper) {
+    this.turnoRepository = turnoRepository;
+    this.odontologoRepository = odontologoRepository;
+    this.pacienteRepository = pacienteRepository;
     this.modelMapper = modelMapper;
   }
 
   @Override
   public TurnoResponseDto createTurno(TurnoRequestDto turno) {
     if (turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      return null;
+      throw new IllegalArgumentException("Datos incompletos.");
     }
-    Odontologo odontologo = odontologoIDao.readOne(turno.getOdontologoCodigo());
-    Paciente paciente = pacienteIDao.readOne(turno.getPacienteDni());
-    if (odontologo == null || paciente == null) {
-      return null;
-    }
-    Turno created = new Turno(
+    Odontologo findOdontologo = getOdontologoOrThrow(turno.getOdontologoCodigo());
+    Paciente findPaciente = getPacienteOrThrow(turno.getPacienteDni());
+
+    Turno createdTurno = new Turno(
             LocalDateTime.parse(turno.getFechaConsulta()),
-            odontologo,
-            paciente);
-    Turno saved = turnoIDao.create(created);
-    if (saved == null) {
-      return null;
-    }
-    Turno getSaveTurno = turnoIDao.readOne(saved.getId());
-    if (getSaveTurno == null) {
-      return null;
-    }
-    return mapToResponseDto(getSaveTurno);
+            findOdontologo,
+            findPaciente);
+    Turno savedTurno = turnoRepository.save(createdTurno);
+    LOGGER.info("Turno guardado: {}", savedTurno.getId());
+    return mapToResponseDto(savedTurno);
   }
 
   @Override
   public TurnoResponseDto getTurnoById(Integer id) {
     if (id == null) {
-      return null;
+      throw new IllegalArgumentException("Ingrese id.");
     }
-    Turno getTurno = turnoIDao.readOne(id);
-    if (getTurno == null) {
-      return null;
-    }
-    return mapToResponseDto(getTurno);
+    Turno findTurno = getTurnoOrThrow(id);
+    return mapToResponseDto(findTurno);
   }
 
   @Override
   public List<TurnoResponseDto> getAllTurnos() {
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
-    List<Turno> turnoList = turnoIDao.readAll();
-    if (turnoList.isEmpty()) {
-      return null;
-    }
+    List<Turno> turnoList = turnoRepository.findAll();
     for (Turno turno : turnoList) {
       turnoResponseDtoList.add(mapToResponseDto(turno));
     }
@@ -83,37 +75,47 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   @Override
   public TurnoResponseDto updateTurno(Integer id, TurnoRequestDto turno) {
     if (id == null || turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      return null;
+      throw new IllegalArgumentException("Datos invalidos para actualizar.");
     }
-    Odontologo odontologo = odontologoIDao.readOne(turno.getOdontologoCodigo());
-    Paciente paciente = pacienteIDao.readOne(turno.getPacienteDni());
-    Turno getTurno = turnoIDao.readOne(id);
-    if (getTurno == null) {
-      return null;
-    }
-    Turno created = new Turno(
-            getTurno.getId(),
-            LocalDateTime.parse(turno.getFechaConsulta()),
-            odontologo,
-            paciente
-    );
-    Turno updated = turnoIDao.update(id, created);
-    if (updated == null) {
-      return null;
-    }
-    Turno getUpdatedTurno = turnoIDao.readOne(updated.getId());
-    if (getUpdatedTurno == null) {
-      return null;
-    }
-    return mapToResponseDto(getUpdatedTurno);
+    Odontologo findOdontologo = getOdontologoOrThrow(turno.getOdontologoCodigo());
+    Paciente findPaciente = getPacienteOrThrow(turno.getPacienteDni());
+    Turno findTurno = getTurnoOrThrow(id);
+
+    findTurno.setFechaConsulta(LocalDateTime.parse(turno.getFechaConsulta()));
+    findTurno.setOdontologo(findOdontologo);
+    findTurno.setPaciente(findPaciente);
+
+    Turno updatedTurno = turnoRepository.save(findTurno);
+    LOGGER.info("Turno actualizado: {}", id);
+    return mapToResponseDto(updatedTurno);
   }
 
   @Override
   public boolean deleteTurno(Integer id) {
     if (id == null) {
-      return false;
+      throw new IllegalArgumentException("Ingrese id.");
     }
-    return turnoIDao.delete(id);
+    return turnoRepository.findById(id)
+            .map(turno -> {
+              turnoRepository.delete(turno);
+              LOGGER.info("Turno eliminado: {}", id);
+              return true;
+            }).orElse(false);
+  }
+
+  private Odontologo getOdontologoOrThrow(String codigo) {
+    return odontologoRepository.findByCodigo(codigo)
+            .orElseThrow(() -> new EntityNotFoundException("Odontólogo no encontrado: " + codigo));
+  }
+
+  private Paciente getPacienteOrThrow(String dni) {
+    return pacienteRepository.findByDni(dni)
+            .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
+  }
+  
+  private Turno getTurnoOrThrow(Integer id) {
+    return turnoRepository.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Turno no encontrado: " + id));
   }
 
   private TurnoResponseDto mapToResponseDto(Turno turno) {

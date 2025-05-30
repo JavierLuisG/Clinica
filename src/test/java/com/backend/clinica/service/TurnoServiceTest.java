@@ -1,103 +1,121 @@
 package com.backend.clinica.service;
 
-import com.backend.clinica.dao.impl.OdontologoDaoH2;
-import com.backend.clinica.dao.impl.PacienteDaoH2;
-import com.backend.clinica.dao.impl.TurnoDaoH2;
-import com.backend.clinica.db.H2Connection;
+import com.backend.clinica.dto.request.DomicilioRequestDto;
+import com.backend.clinica.dto.request.OdontologoRequestDto;
+import com.backend.clinica.dto.request.PacienteRequestDto;
 import com.backend.clinica.dto.request.TurnoRequestDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
+import com.backend.clinica.dto.response.PacienteResponseDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
 import com.backend.clinica.service.impl.OdontologoService;
+import com.backend.clinica.service.impl.PacienteService;
 import com.backend.clinica.service.impl.TurnoService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TurnoServiceTest {
-  private static TurnoService turnoService;
   @Autowired
-  private static OdontologoService odontologoService;
-
-  @BeforeAll
-  static void setUp() {
-    H2Connection.createTable();
-    ModelMapper modelMapper = new ModelMapper();
-    turnoService = new TurnoService(new TurnoDaoH2(), new OdontologoDaoH2(), new PacienteDaoH2(), modelMapper);
-  }
+  private TurnoService turnoService;
+  @Autowired
+  private OdontologoService odontologoService;
+  @Autowired
+  private PacienteService pacienteService;
+  private static final String CODIGO_ODONTOLOGO = "OD00001";
+  private static final String DNI_PACIENTE = "12345678";
+  private static Integer turnoCreadoId;
 
   @Test
   @Order(1)
-  @DisplayName("Agregar un turno con odontologo y paciente ya existentes")
-  void testInsertOne() {
-    TurnoRequestDto turnoRequestDto = new TurnoRequestDto(
-            "2025-07-15",
-            "OD00125",
-            "56781234");
+  @DisplayName("Crear un turno con paciente y odontólogo existentes")
+  void testCreateTurno() {
+    DomicilioRequestDto domicilioRequestDto = new DomicilioRequestDto("Av Siempre Viva", "742", "Springfield", "Texas");
+    PacienteRequestDto pacienteRequestDto = new PacienteRequestDto("Homero", "Simpson", DNI_PACIENTE, LocalDateTime.now().toString(), domicilioRequestDto);
+    PacienteResponseDto createdPaciente = pacienteService.createPaciente(pacienteRequestDto);
 
-    TurnoResponseDto insertado = turnoService.createTurno(turnoRequestDto);
+    // Creamos odontólogo si no existe
+    OdontologoRequestDto odontologoRequestDto = new OdontologoRequestDto(CODIGO_ODONTOLOGO, "Lisa", "Simpson");
+    OdontologoResponseDto createdOdontologo = odontologoService.createOdontologo(odontologoRequestDto);
 
-    assertNotNull(insertado);
-    assertNotNull(insertado.getId());
-    assertEquals(3, insertado.getPacienteResponseDto().getId());
-    assertEquals(3, insertado.getPacienteResponseDto().getId());
+    TurnoRequestDto turnoDto = new TurnoRequestDto("2025-08-15T10:30:00", createdOdontologo.getCodigo(), createdPaciente.getDni());
+    TurnoResponseDto creado = turnoService.createTurno(turnoDto);
+
+    assertNotNull(creado, "Turno debería estar creado");
+    assertNotNull(creado.getId(), "Turno debería tener id");
+    assertEquals(CODIGO_ODONTOLOGO, creado.getOdontologoResponseDto().getCodigo(), "Código debería coincidir");
+    assertEquals(DNI_PACIENTE, creado.getPacienteResponseDto().getDni(), "Dni debería coincidir");
+
+    turnoCreadoId = creado.getId();
   }
 
   @Test
   @Order(2)
-  @DisplayName("Buscar turno por id")
-  void testReadOne() {
-    TurnoResponseDto turno = turnoService.getTurnoById(1);
-
-    assertNotNull(turno, "El turno debería existir");
-    assertEquals("2025-05-25", turno.getFechaConsulta(), "La fecha debe coincidir");
-    assertEquals(1, turno.getId(), "El id de turno debe coincidir");
-    assertEquals(2, turno.getOdontologoResponseDto().getId(), "El id de odontólogo debe coincidir");
-    assertEquals(1, turno.getPacienteResponseDto().getId(), "El id de paciente debe coincidir");
+  @DisplayName("Buscar turno por ID")
+  void testGetTurnoById() {
+    TurnoResponseDto turno = turnoService.getTurnoById(turnoCreadoId);
+    assertNotNull(turno);
+    assertEquals(turnoCreadoId, turno.getId());
+    assertEquals(DNI_PACIENTE, turno.getPacienteResponseDto().getDni());
   }
 
   @Test
   @Order(3)
-  @DisplayName("Buscar todos los turnos")
-  void testReadAll() {
-    List<TurnoResponseDto> listTurnos = turnoService.getAllTurnos();
-    assertNotNull(listTurnos, "La lista no debería ser nula");
-    assertTrue(listTurnos.size() >= 3, "Debería haber al menos 3 turnos");
-
-    for (TurnoResponseDto turno : listTurnos) {
-      assertNotNull(turno.getOdontologoResponseDto(), "Todos los turnos deben tener un odontólogo");
-      assertNotNull(turno.getPacienteResponseDto(), "Todos los turnos deben tener un paciente");
+  @DisplayName("Listar todos los turnos")
+  void testGetAllTurnos() {
+    List<TurnoResponseDto> turnos = turnoService.getAllTurnos();
+    assertNotNull(turnos);
+    assertTrue(turnos.size() >= 1, "Debería haber al menos un turno");
+    for (TurnoResponseDto turno : turnos) {
+      assertNotNull(turno.getOdontologoResponseDto());
+      assertNotNull(turno.getPacienteResponseDto());
     }
   }
 
   @Test
   @Order(4)
-  @DisplayName("Actualizar informacion de un turno")
-  void testUpdate() {
-    TurnoResponseDto turnoOriginal = turnoService.getTurnoById(7);
-    assertNotNull(turnoOriginal, "El turno debería existir");
+  @DisplayName("Actualizar un turno")
+  void testUpdateTurno() {
+    OdontologoResponseDto nuevoOdontologo = odontologoService.createOdontologo(new OdontologoRequestDto("OD99999", "Marvin", "Monroe"));
+    TurnoRequestDto nuevoTurnoDto = new TurnoRequestDto("2025-09-01T09:25:00", nuevoOdontologo.getCodigo(), DNI_PACIENTE);
 
-    OdontologoResponseDto odontologo = odontologoService.getOdontologoByCodigo("OD00127");
-    assertNotNull(odontologo, "El odontólogo debería existir para asignarlo en el turno Nro 1");
-
-    TurnoRequestDto turnoNuevo = new TurnoRequestDto(turnoOriginal.getFechaConsulta(), odontologo.getCodigo(), turnoOriginal.getPacienteResponseDto().getDni());
-    TurnoResponseDto turnoActualizado = turnoService.updateTurno(1, turnoNuevo);
-    assertNotNull(turnoActualizado, "El resultado no debería ser nulo");
-
-    TurnoResponseDto verificarTurnoActualizado = turnoService.getTurnoById(turnoActualizado.getId());
-    assertEquals("OD00127", verificarTurnoActualizado.getOdontologoResponseDto().getCodigo(), "El código debería estar actualizado");
+    TurnoResponseDto actualizado = turnoService.updateTurno(turnoCreadoId, nuevoTurnoDto);
+    assertNotNull(actualizado);
+    assertEquals("OD99999", actualizado.getOdontologoResponseDto().getCodigo());
+    assertEquals("2025-09-01T09:25", actualizado.getFechaConsulta());
   }
 
   @Test
   @Order(5)
   @DisplayName("Eliminar un turno")
-  void testDelete() {
-    boolean eliminado = turnoService.deleteTurno(6);
-    assertTrue(eliminado, "La eliminación de turno debería ser exitosa");
-    assertNull(turnoService.getTurnoById(6), "El turno no debería de existir después de eliminado");
+  void testDeleteTurno() {
+    boolean eliminado = turnoService.deleteTurno(turnoCreadoId);
+    assertTrue(eliminado);
+
+    assertThrows(EntityNotFoundException.class, () -> {
+      turnoService.getTurnoById(turnoCreadoId);
+    });
+  }
+
+  @Test
+  @Order(6)
+  @DisplayName("Manejo de errores")
+  void testErrorHandling() {
+    // Buscar con ID nulo
+    assertThrows(IllegalArgumentException.class, () -> {
+      turnoService.getTurnoById(null);
+    });
+
+    // Buscar turno inexistente
+    assertThrows(EntityNotFoundException.class, () -> {
+      turnoService.getTurnoById(999999);
+    });
   }
 }
-
