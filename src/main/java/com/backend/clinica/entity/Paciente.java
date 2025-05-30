@@ -20,6 +20,7 @@ public class Paciente {
   private Integer id;
   private String nombre;
   private String apellido;
+  @Column(unique = true)
   private String dni;
   @Column(name = "fecha_registro")
   private LocalDateTime fechaRegistro;

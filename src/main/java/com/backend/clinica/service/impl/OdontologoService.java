@@ -25,7 +25,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
   @Override
   public OdontologoResponseDto createOdontologo(OdontologoRequestDto odontologo) {
     if (odontologo == null) {
-      throw new IllegalArgumentException("Datos incompletos");
+      throw new IllegalArgumentException("Datos incompletos.");
     }
     if (odontologoRepository.findByCodigo(odontologo.getCodigo()).isPresent()) {
       throw new IllegalArgumentException("Ya existe odontólogo con código: " + odontologo.getCodigo());
@@ -42,7 +42,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
   @Override
   public OdontologoResponseDto getOdontologoByCodigo(String codigo) {
     if (codigo == null) {
-      throw new IllegalArgumentException("Ingrese código");
+      throw new IllegalArgumentException("Ingrese código.");
     }
     Odontologo findOdontologo = odontologoRepository
             .findByCodigo(codigo)
@@ -73,7 +73,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     findOdontologo.setApellido(odontologo.getApellido());
 
     Odontologo updatedOdontologo = odontologoRepository.save(findOdontologo);
-    LOGGER.info("Odontólogo actualizado: {}", updatedOdontologo.getCodigo());
+    LOGGER.info("Odontólogo actualizado: {}", codigo);
     return mapToDto(updatedOdontologo);
   }
 

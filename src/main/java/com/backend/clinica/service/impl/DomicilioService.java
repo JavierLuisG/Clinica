@@ -1,10 +1,13 @@
 package com.backend.clinica.service.impl;
 
-import com.backend.clinica.dao.IDao;
 import com.backend.clinica.dto.request.DomicilioRequestDto;
 import com.backend.clinica.dto.response.DomicilioResponseDto;
 import com.backend.clinica.entity.Domicilio;
+import com.backend.clinica.repository.IDomicilioRepository;
 import com.backend.clinica.service.IDomicilioService;
+import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,52 +15,43 @@ import java.util.List;
 
 @Service
 public class DomicilioService implements IDomicilioService<Integer, DomicilioRequestDto, DomicilioResponseDto> {
-  private final IDao<Integer, Domicilio> domicilioIDao;
+  Logger LOGGER = LoggerFactory.getLogger(OdontologoService.class);
+  private final IDomicilioRepository domicilioRepository;
 
-  public DomicilioService(IDao<Integer, Domicilio> domicilioIDao) {
-    this.domicilioIDao = domicilioIDao;
+  public DomicilioService(IDomicilioRepository domicilioRepository) {
+    this.domicilioRepository = domicilioRepository;
   }
 
   @Override
   public DomicilioResponseDto createDomicilio(DomicilioRequestDto domicilio) {
     if (domicilio == null) {
-      return null;
+      throw new IllegalArgumentException("Datos incompletos.");
     }
-    Domicilio created = new Domicilio(
+    Domicilio createdDomicilio = new Domicilio(
             domicilio.getCalle(),
             domicilio.getNumero(),
             domicilio.getLocalidad(),
             domicilio.getCiudad());
-    Domicilio saved = domicilioIDao.create(created);
-    if (saved == null) {
-      return null;
-    }
-    Domicilio getSaveDomicilio = domicilioIDao.readOne(saved.getId());
-    if (getSaveDomicilio == null) {
-      return null;
-    }
-    return mapToDto(getSaveDomicilio);
+    Domicilio savedDomicilio = domicilioRepository.save(createdDomicilio);
+    LOGGER.info("Domicilio guardado: {}", savedDomicilio.getId());
+    return mapToDto(savedDomicilio);
   }
 
   @Override
   public DomicilioResponseDto getDomicilioById(Integer id) {
     if (id == null) {
-      return null;
+      throw new IllegalArgumentException("Ingrese id.");
     }
-    Domicilio getDomicilio = domicilioIDao.readOne(id);
-    if (getDomicilio == null) {
-      return null;
-    }
-    return mapToDto(getDomicilio);
+    Domicilio findDomicilio = domicilioRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Domicilio no encontrado: " + id));
+    return mapToDto(findDomicilio);
   }
 
   @Override
   public List<DomicilioResponseDto> getAllDomicilios() {
     List<DomicilioResponseDto> domicilioResponseDtoList = new ArrayList<>();
-    List<Domicilio> domicilioList = domicilioIDao.readAll();
-    if (domicilioList.isEmpty()) {
-      return null;
-    }
+    List<Domicilio> domicilioList = domicilioRepository.findAll();
     for (Domicilio domicilio : domicilioList) {
       domicilioResponseDtoList.add(mapToDto(domicilio));
     }
@@ -67,35 +61,33 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
   @Override
   public DomicilioResponseDto updateDomicilio(Integer id, DomicilioRequestDto domicilio) {
     if (id == null || domicilio == null) {
-      return null;
+      throw new IllegalArgumentException("Datos invalidos para actualizar.");
     }
-    Domicilio getDomicilio = domicilioIDao.readOne(id);
-    if (getDomicilio == null) {
-      return null;
-    }
-    Domicilio created = new Domicilio(
-            getDomicilio.getId(),
-            domicilio.getCalle(),
-            domicilio.getNumero(),
-            domicilio.getLocalidad(),
-            domicilio.getCiudad());
-    Domicilio updated = domicilioIDao.update(id, created);
-    if (updated == null) {
-      return null;
-    }
-    Domicilio getUpdatedDomicilio = domicilioIDao.readOne(updated.getId());
-    if (getUpdatedDomicilio == null) {
-      return null;
-    }
-    return mapToDto(getUpdatedDomicilio);
+    Domicilio findDomicilio = domicilioRepository
+            .findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Domicilio no encontrado: " + id));
+
+    findDomicilio.setCalle(domicilio.getCalle());
+    findDomicilio.setNumero(domicilio.getNumero());
+    findDomicilio.setLocalidad(domicilio.getLocalidad());
+    findDomicilio.setCiudad(domicilio.getCiudad());
+
+    Domicilio updatedDomicilio = domicilioRepository.save(findDomicilio);
+    LOGGER.info("Domicilio actualizado: {}", id);
+    return mapToDto(updatedDomicilio);
   }
 
   @Override
   public boolean deleteDomicilio(Integer id) {
     if (id == null) {
-      return false;
+      throw new IllegalArgumentException("Ingrese id.");
     }
-    return domicilioIDao.delete(id);
+    return domicilioRepository.findById(id)
+            .map(domicilio -> {
+              domicilioRepository.delete(domicilio);
+              LOGGER.info("Domicilio eliminado: {}", id);
+              return true;
+            }).orElse(false);
   }
 
   private DomicilioResponseDto mapToDto(Domicilio domicilio) {

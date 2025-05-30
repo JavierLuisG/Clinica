@@ -13,6 +13,7 @@ public class Odontologo {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Integer id;
+  @Column(unique = true)
   private String codigo;
   private String nombre;
   private String apellido;
