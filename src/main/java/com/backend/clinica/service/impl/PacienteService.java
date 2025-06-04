@@ -27,12 +27,14 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
 
   @Override
   public PacienteResponseDto createPaciente(PacienteRequestDto paciente) {
+    // 1. validaciones
     if (paciente == null || paciente.getDomicilio() == null) {
       throw new IllegalArgumentException("Datos incompletos.");
     }
     if (pacienteRepository.findByDni(paciente.getDni()).isPresent()) {
       throw new IllegalArgumentException("Ya existe odontólogo con código: " + paciente.getDni());
     }
+    // 2. crear entidades
     Domicilio createdDomicilio = new Domicilio(
             paciente.getDomicilio().getCalle(),
             paciente.getDomicilio().getNumero(),
@@ -44,6 +46,9 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
             paciente.getDni(),
             LocalDateTime.parse(paciente.getFechaRegistro()),
             createdDomicilio);
+    // 3. asociar relación inversa
+    createdDomicilio.setPaciente(createdPaciente);
+    // 4. guardar y devolver DTO
     Paciente savedPaciente = pacienteRepository.save(createdPaciente);
     LOGGER.info("Paciente guardado: {}", savedPaciente.getDni());
     return mapToDto(savedPaciente);

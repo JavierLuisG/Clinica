@@ -20,6 +20,8 @@ public class Domicilio {
   private String numero;
   private String localidad;
   private String ciudad;
+  @OneToOne(mappedBy = "domicilio") // crear el bidireccionamiento
+  private Paciente paciente;
   private boolean state = true;
 
   public Domicilio(Integer id, String calle, String numero, String localidad, String ciudad) {
