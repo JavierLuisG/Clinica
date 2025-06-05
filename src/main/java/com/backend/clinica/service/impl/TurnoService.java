@@ -1,9 +1,11 @@
 package com.backend.clinica.service.impl;
 
 import com.backend.clinica.dto.request.TurnoRequestDto;
+import com.backend.clinica.dto.response.DomicilioResponseDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.dto.response.PacienteResponseDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
+import com.backend.clinica.entity.Domicilio;
 import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.entity.Paciente;
 import com.backend.clinica.entity.Turno;
@@ -112,7 +114,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     return pacienteRepository.findByDni(dni)
             .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
   }
-  
+
   private Turno getTurnoOrThrow(Integer id) {
     return turnoRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Turno no encontrado: " + id));
@@ -122,6 +124,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     TurnoResponseDto turnoResponseDto = modelMapper.map(turno, TurnoResponseDto.class);
     turnoResponseDto.setOdontologoResponseDto(modelMapper.map(turno.getOdontologo(), OdontologoResponseDto.class));
     turnoResponseDto.setPacienteResponseDto(modelMapper.map(turno.getPaciente(), PacienteResponseDto.class));
+    turnoResponseDto.getPacienteResponseDto().setDomicilioResponseDto(modelMapper.map(turno.getPaciente().getDomicilio(), DomicilioResponseDto.class));
     return turnoResponseDto;
   }
 }

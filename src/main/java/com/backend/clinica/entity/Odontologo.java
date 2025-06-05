@@ -3,6 +3,9 @@ package com.backend.clinica.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name = "odontologos")
 @NoArgsConstructor
@@ -17,6 +20,8 @@ public class Odontologo {
   private String codigo;
   private String nombre;
   private String apellido;
+  @OneToMany(mappedBy = "odontologo", cascade = CascadeType.ALL)
+  private Set<Turno> turnos = new HashSet<>();
   private boolean state = true;
 
   public Odontologo(Integer id, String codigo, String nombre, String apellido) {

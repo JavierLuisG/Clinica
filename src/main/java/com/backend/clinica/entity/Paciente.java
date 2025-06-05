@@ -7,6 +7,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "pacientes")
@@ -31,6 +33,8 @@ public class Paciente {
           foreignKey = @ForeignKey(name = "fk_paciente_domicilio")
   )
   private Domicilio domicilio;
+  @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL)
+  private Set<Turno> turnos = new HashSet<>();
   private boolean state = true;
 
   public Paciente(Integer id, String nombre, String apellido, String dni, LocalDateTime fechaRegistro, Domicilio domicilio) {
