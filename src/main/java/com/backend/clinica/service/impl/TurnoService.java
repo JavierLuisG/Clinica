@@ -5,7 +5,6 @@ import com.backend.clinica.dto.response.DomicilioResponseDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.dto.response.PacienteResponseDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
-import com.backend.clinica.entity.Domicilio;
 import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.entity.Paciente;
 import com.backend.clinica.entity.Turno;
