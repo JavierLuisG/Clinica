@@ -1,5 +1,6 @@
 package com.backend.clinica.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class Domicilio {
   private String localidad;
   private String ciudad;
   @OneToOne(mappedBy = "domicilio") // crear el bidireccionamiento
+  @JsonIgnore
   private Paciente paciente;
   private boolean state = true;
 

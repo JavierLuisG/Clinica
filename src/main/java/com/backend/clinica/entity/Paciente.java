@@ -1,5 +1,6 @@
 package com.backend.clinica.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,7 @@ public class Paciente {
   )
   private Domicilio domicilio;
   @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL)
+  @JsonIgnore
   private Set<Turno> turnos = new HashSet<>();
   private boolean state = true;
 
