@@ -117,6 +117,19 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     return turnoResponseDtoList;
   }
 
+  @Override
+  public List<TurnoResponseDto> findByFirstname(String nombre) {
+    if (nombre == null) {
+      throw new IllegalArgumentException("Ingrese nombre.");
+    }
+    List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
+    List<Turno> turnoList = turnoRepository.findByFirstname(nombre);
+    for (Turno turno : turnoList) {
+      turnoResponseDtoList.add(mapToResponseDto(turno));
+    }
+    return turnoResponseDtoList;
+  }
+
   private Odontologo getOdontologoOrThrow(String codigo) {
     return odontologoRepository.findByCodigo(codigo)
         .orElseThrow(() -> new EntityNotFoundException("Odontólogo no encontrado: " + codigo));

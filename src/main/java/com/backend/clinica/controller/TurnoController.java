@@ -95,4 +95,16 @@ public class TurnoController {
     }
     return ResponseEntity.ok(turnoList);
   }
+
+  @GetMapping("/odontologo/{nombre}")
+  public ResponseEntity<List<TurnoResponseDto>> getTurnosByOdontologoName(@PathVariable String nombre) {
+    if (nombre == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    List<TurnoResponseDto> turnoList = turnoService.findByFirstname(nombre);
+    if (turnoList.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    return ResponseEntity.ok(turnoList);
+  }
 }

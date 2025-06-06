@@ -16,4 +16,6 @@ public interface ITurnoService<Type, Request, Response> {
 
   // ================== HQL methods ==================
   List<Response> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate);
+
+  List<Response> findByFirstname(String nombre);
 }
