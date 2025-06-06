@@ -7,23 +7,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
 @RequestMapping("/turno")
 public class TurnoController {
-  private final ITurnoService<Integer, TurnoRequestDto, TurnoResponseDto> iTurnoService;
+  private final ITurnoService<Integer, TurnoRequestDto, TurnoResponseDto> turnoService;
 
-  public TurnoController(ITurnoService<Integer, TurnoRequestDto, TurnoResponseDto> iTurnoService) {
-    this.iTurnoService = iTurnoService;
+  public TurnoController(ITurnoService<Integer, TurnoRequestDto, TurnoResponseDto> turnoService) {
+    this.turnoService = turnoService;
   }
+
+  private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
   @PostMapping
   public ResponseEntity<TurnoResponseDto> postTurno(@RequestBody TurnoRequestDto turno) {
     if (turno == null || turno.getFechaConsulta() == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    TurnoResponseDto createTurno = iTurnoService.createTurno(turno);
+    TurnoResponseDto createTurno = turnoService.createTurno(turno);
     if (createTurno == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
@@ -35,7 +39,7 @@ public class TurnoController {
     if (id == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    TurnoResponseDto turno = iTurnoService.getTurnoById(id);
+    TurnoResponseDto turno = turnoService.getTurnoById(id);
     if (turno == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
@@ -44,7 +48,7 @@ public class TurnoController {
 
   @GetMapping
   public ResponseEntity<List<TurnoResponseDto>> getAllTurnos() {
-    List<TurnoResponseDto> turnoList = iTurnoService.getAllTurnos();
+    List<TurnoResponseDto> turnoList = turnoService.getAllTurnos();
     if (turnoList.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
@@ -56,7 +60,7 @@ public class TurnoController {
     if (id == null || turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    TurnoResponseDto updateTurno = iTurnoService.updateTurno(id, turno);
+    TurnoResponseDto updateTurno = turnoService.updateTurno(id, turno);
     if (updateTurno == null) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
@@ -68,9 +72,27 @@ public class TurnoController {
     if (id == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    if (!iTurnoService.deleteTurno(id)) {
+    if (!turnoService.deleteTurno(id)) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
     return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  }
+
+  // ================== HQL methods ==================
+  @GetMapping("/fecha")
+  public ResponseEntity<List<TurnoResponseDto>> getTurnosEntreFechas(
+      @RequestParam("firstDate") String firstDate,
+      @RequestParam("endDate") String endDate
+  ) {
+    if (firstDate == null || endDate == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    LocalDateTime first = LocalDateTime.parse(firstDate, formatter);
+    LocalDateTime end = LocalDateTime.parse(endDate, formatter);
+    List<TurnoResponseDto> turnoList = turnoService.findByStartDateBetween(first, end);
+    if (turnoList.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    return ResponseEntity.ok(turnoList);
   }
 }

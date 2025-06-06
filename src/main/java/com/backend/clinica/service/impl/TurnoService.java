@@ -46,9 +46,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     Paciente findPaciente = getPacienteOrThrow(turno.getPacienteDni());
 
     Turno createdTurno = new Turno(
-            LocalDateTime.parse(turno.getFechaConsulta()),
-            findOdontologo,
-            findPaciente);
+        LocalDateTime.parse(turno.getFechaConsulta()),
+        findOdontologo,
+        findPaciente);
     Turno savedTurno = turnoRepository.save(createdTurno);
     LOGGER.info("Turno guardado: {}", savedTurno.getId());
     return mapToResponseDto(savedTurno);
@@ -97,26 +97,40 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
       throw new IllegalArgumentException("Ingrese id.");
     }
     return turnoRepository.findById(id)
-            .map(turno -> {
-              turnoRepository.delete(turno);
-              LOGGER.info("Turno eliminado: {}", id);
-              return true;
-            }).orElse(false);
+        .map(turno -> {
+          turnoRepository.delete(turno);
+          LOGGER.info("Turno eliminado: {}", id);
+          return true;
+        }).orElse(false);
+  }
+
+  @Override
+  public List<TurnoResponseDto> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate) {
+    if (firstDate == null || endDate == null) {
+      throw new IllegalArgumentException("Ingrese las fechas correctamente.");
+    }
+    List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
+    List<Turno> turnoList = turnoRepository.findByStartDateBetween(firstDate, endDate);
+    for (Turno turno : turnoList) {
+      turnoResponseDtoList.add(mapToResponseDto(turno));
+    }
+    return turnoResponseDtoList;
   }
 
   private Odontologo getOdontologoOrThrow(String codigo) {
     return odontologoRepository.findByCodigo(codigo)
-            .orElseThrow(() -> new EntityNotFoundException("Odontólogo no encontrado: " + codigo));
+        .orElseThrow(() -> new EntityNotFoundException("Odontólogo no encontrado: " + codigo));
   }
 
   private Paciente getPacienteOrThrow(String dni) {
     return pacienteRepository.findByDni(dni)
-            .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
+        .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
   }
 
   private Turno getTurnoOrThrow(Integer id) {
     return turnoRepository.findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Turno no encontrado: " + id));
+        .orElseThrow(() ->
+            new EntityNotFoundException("Turno no encontrado: " + id));
   }
 
   private TurnoResponseDto mapToResponseDto(Turno turno) {
