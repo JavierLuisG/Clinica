@@ -118,12 +118,25 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public List<TurnoResponseDto> findByFirstname(String nombre) {
-    if (nombre == null) {
-      throw new IllegalArgumentException("Ingrese nombre.");
+  public List<TurnoResponseDto> findByOdontologoCodigo(String codigo) {
+    if (codigo == null) {
+      throw new IllegalArgumentException("Ingrese código.");
     }
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
-    List<Turno> turnoList = turnoRepository.findByFirstname(nombre);
+    List<Turno> turnoList = turnoRepository.findByOdontologoCodigo(codigo);
+    for (Turno turno : turnoList) {
+      turnoResponseDtoList.add(mapToResponseDto(turno));
+    }
+    return turnoResponseDtoList;
+  }
+
+  @Override
+  public List<TurnoResponseDto> findByPacienteDni(String dni) {
+    if (dni == null) {
+      throw new IllegalArgumentException("Ingrese dni.");
+    }
+    List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
+    List<Turno> turnoList = turnoRepository.findByPacienteDni(dni);
     for (Turno turno : turnoList) {
       turnoResponseDtoList.add(mapToResponseDto(turno));
     }

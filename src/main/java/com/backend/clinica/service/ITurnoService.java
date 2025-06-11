@@ -17,5 +17,7 @@ public interface ITurnoService<Type, Request, Response> {
   // ================== HQL methods ==================
   List<Response> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate);
 
-  List<Response> findByFirstname(String nombre);
+  List<Response> findByOdontologoCodigo(String codigo);
+
+  List<Response> findByPacienteDni(String dni);
 }

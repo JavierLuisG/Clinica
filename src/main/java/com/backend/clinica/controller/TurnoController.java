@@ -96,12 +96,24 @@ public class TurnoController {
     return ResponseEntity.ok(turnoList);
   }
 
-  @GetMapping("/odontologo/{nombre}")
-  public ResponseEntity<List<TurnoResponseDto>> getTurnosByOdontologoName(@PathVariable String nombre) {
-    if (nombre == null) {
+  @GetMapping("/odontologo/{codigo}")
+  public ResponseEntity<List<TurnoResponseDto>> getTurnosByOdontologoCodigo(@PathVariable String codigo) {
+    if (codigo == null) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
-    List<TurnoResponseDto> turnoList = turnoService.findByFirstname(nombre);
+    List<TurnoResponseDto> turnoList = turnoService.findByOdontologoCodigo(codigo);
+    if (turnoList.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+    return ResponseEntity.ok(turnoList);
+  }
+
+  @GetMapping("/paciente/{dni}")
+  public ResponseEntity<List<TurnoResponseDto>> getTurnosByPacienteDni(@PathVariable String dni) {
+    if (dni == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
+    List<TurnoResponseDto> turnoList = turnoService.findByPacienteDni(dni);
     if (turnoList.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
