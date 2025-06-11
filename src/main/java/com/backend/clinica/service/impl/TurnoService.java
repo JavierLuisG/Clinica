@@ -14,7 +14,6 @@ import com.backend.clinica.repository.IOdontologoRepository;
 import com.backend.clinica.repository.IPacienteRepository;
 import com.backend.clinica.repository.ITurnoRepository;
 import com.backend.clinica.service.ITurnoService;
-import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +39,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public TurnoResponseDto createTurno(TurnoRequestDto turno) {
+  public TurnoResponseDto createTurno(TurnoRequestDto turno) throws ResourceNotFoundException, IllegalArgException {
     if (turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      throw new IllegalArgumentException("Datos incompletos.");
+      throw new IllegalArgException("Ingrese correctamente los datos");
     }
     Odontologo findOdontologo = getOdontologoOrThrow(turno.getOdontologoCodigo());
     Paciente findPaciente = getPacienteOrThrow(turno.getPacienteDni());
@@ -57,9 +56,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public TurnoResponseDto getTurnoById(Integer id) {
+  public TurnoResponseDto getTurnoById(Integer id) throws ResourceNotFoundException, IllegalArgException {
     if (id == null) {
-      throw new IllegalArgumentException("Ingrese id.");
+      throw new IllegalArgException("Ingrese correctamente el id");
     }
     Turno findTurno = getTurnoOrThrow(id);
     return mapToResponseDto(findTurno);
@@ -76,9 +75,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public TurnoResponseDto updateTurno(Integer id, TurnoRequestDto turno) {
-    if (id == null || turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      throw new IllegalArgumentException("Datos invalidos para actualizar.");
+  public TurnoResponseDto updateTurno(Integer id, TurnoRequestDto turno) throws IllegalArgException, ResourceNotFoundException {
+    if (id == null || id <= 0 || turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
+      throw new IllegalArgException("Datos inválidos para actualizar");
     }
     Odontologo findOdontologo = getOdontologoOrThrow(turno.getOdontologoCodigo());
     Paciente findPaciente = getPacienteOrThrow(turno.getPacienteDni());
@@ -98,18 +97,13 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     if (id == null || id <= 0) {
       throw new IllegalArgException("Ingrese correctamente el id");
     }
-    Turno turno = turnoRepository
-        .findById(id)
-        .orElseThrow(() -> new ResourceNotFoundException("Turno " + id + " no encontrado"));
+    Turno findTurno = getTurnoOrThrow(id);
     LOGGER.info("Turno eliminado: {}", id);
-    turnoRepository.delete(turno);
+    turnoRepository.delete(findTurno);
   }
 
   @Override
   public List<TurnoResponseDto> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate) {
-    if (firstDate == null || endDate == null) {
-      throw new IllegalArgumentException("Ingrese las fechas correctamente.");
-    }
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoRepository.findByStartDateBetween(firstDate, endDate);
     for (Turno turno : turnoList) {
@@ -119,9 +113,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public List<TurnoResponseDto> findByOdontologoCodigo(String codigo) {
+  public List<TurnoResponseDto> findByOdontologoCodigo(String codigo) throws IllegalArgException {
     if (codigo == null) {
-      throw new IllegalArgumentException("Ingrese código.");
+      throw new IllegalArgException("Ingrese correctamente el código");
     }
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoRepository.findByOdontologoCodigo(codigo);
@@ -132,9 +126,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public List<TurnoResponseDto> findByPacienteDni(String dni) {
+  public List<TurnoResponseDto> findByPacienteDni(String dni) throws IllegalArgException {
     if (dni == null) {
-      throw new IllegalArgumentException("Ingrese dni.");
+      throw new IllegalArgException("Ingrese correctamente el id");
     }
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoRepository.findByPacienteDni(dni);
@@ -144,20 +138,19 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
     return turnoResponseDtoList;
   }
 
-  private Odontologo getOdontologoOrThrow(String codigo) {
+  private Odontologo getOdontologoOrThrow(String codigo) throws ResourceNotFoundException {
     return odontologoRepository.findByCodigo(codigo)
-        .orElseThrow(() -> new EntityNotFoundException("Odontólogo no encontrado: " + codigo));
+        .orElseThrow(() -> new ResourceNotFoundException("Odontólogo " + codigo + " no encontrado"));
   }
 
-  private Paciente getPacienteOrThrow(String dni) {
+  private Paciente getPacienteOrThrow(String dni) throws ResourceNotFoundException {
     return pacienteRepository.findByDni(dni)
-        .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
+        .orElseThrow(() -> new ResourceNotFoundException("Paciente " + dni + " no encontrado"));
   }
 
-  private Turno getTurnoOrThrow(Integer id) {
+  private Turno getTurnoOrThrow(Integer id) throws ResourceNotFoundException {
     return turnoRepository.findById(id)
-        .orElseThrow(() ->
-            new EntityNotFoundException("Turno no encontrado: " + id));
+        .orElseThrow(() -> new ResourceNotFoundException("Turno " + id + " no encontrado"));
   }
 
   private TurnoResponseDto mapToResponseDto(Turno turno) {

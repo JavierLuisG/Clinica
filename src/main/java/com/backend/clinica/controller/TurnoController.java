@@ -4,6 +4,7 @@ import com.backend.clinica.dto.MessageResponse;
 import com.backend.clinica.dto.request.TurnoRequestDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
 import com.backend.clinica.exception.IllegalArgException;
+import com.backend.clinica.exception.ParseDateTimeException;
 import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.ITurnoService;
 import org.springframework.http.HttpStatus;
@@ -26,47 +27,26 @@ public class TurnoController {
   private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
   @PostMapping
-  public ResponseEntity<TurnoResponseDto> postTurno(@RequestBody TurnoRequestDto turno) {
-    if (turno == null || turno.getFechaConsulta() == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<TurnoResponseDto> postTurno(@RequestBody TurnoRequestDto turno) throws ResourceNotFoundException, IllegalArgException {
     TurnoResponseDto createTurno = turnoService.createTurno(turno);
-    if (createTurno == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
     return ResponseEntity.status(HttpStatus.CREATED).body(createTurno);
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<TurnoResponseDto> getTurnoById(@PathVariable Integer id) {
-    if (id == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<TurnoResponseDto> getTurnoById(@PathVariable Integer id) throws ResourceNotFoundException, IllegalArgException {
     TurnoResponseDto turno = turnoService.getTurnoById(id);
-    if (turno == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
     return ResponseEntity.ok(turno);
   }
 
   @GetMapping
   public ResponseEntity<List<TurnoResponseDto>> getAllTurnos() {
     List<TurnoResponseDto> turnoList = turnoService.getAllTurnos();
-    if (turnoList.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
     return ResponseEntity.ok(turnoList);
   }
 
   @PutMapping("/{id}")
-  public ResponseEntity<TurnoResponseDto> putTurno(@PathVariable Integer id, @RequestBody TurnoRequestDto turno) {
-    if (id == null || turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<TurnoResponseDto> putTurno(@PathVariable Integer id, @RequestBody TurnoRequestDto turno) throws IllegalArgException, ResourceNotFoundException {
     TurnoResponseDto updateTurno = turnoService.updateTurno(id, turno);
-    if (updateTurno == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
     return ResponseEntity.ok(updateTurno);
   }
 
@@ -81,40 +61,28 @@ public class TurnoController {
   public ResponseEntity<List<TurnoResponseDto>> getTurnosEntreFechas(
       @RequestParam("firstDate") String firstDate,
       @RequestParam("endDate") String endDate
-  ) {
-    if (firstDate == null || endDate == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+  ) throws ParseDateTimeException {
+    LocalDateTime first;
+    LocalDateTime end;
+    try {
+      first = LocalDateTime.parse(firstDate, formatter);
+      end = LocalDateTime.parse(endDate, formatter);
+    } catch (Exception e) {
+      throw new ParseDateTimeException("Ingrese correctamente el rango de fechas");
     }
-    LocalDateTime first = LocalDateTime.parse(firstDate, formatter);
-    LocalDateTime end = LocalDateTime.parse(endDate, formatter);
     List<TurnoResponseDto> turnoList = turnoService.findByStartDateBetween(first, end);
-    if (turnoList.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
     return ResponseEntity.ok(turnoList);
   }
 
   @GetMapping("/odontologo/{codigo}")
-  public ResponseEntity<List<TurnoResponseDto>> getTurnosByOdontologoCodigo(@PathVariable String codigo) {
-    if (codigo == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<List<TurnoResponseDto>> getTurnosByOdontologoCodigo(@PathVariable String codigo) throws IllegalArgException {
     List<TurnoResponseDto> turnoList = turnoService.findByOdontologoCodigo(codigo);
-    if (turnoList.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
     return ResponseEntity.ok(turnoList);
   }
 
   @GetMapping("/paciente/{dni}")
-  public ResponseEntity<List<TurnoResponseDto>> getTurnosByPacienteDni(@PathVariable String dni) {
-    if (dni == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<List<TurnoResponseDto>> getTurnosByPacienteDni(@PathVariable String dni) throws IllegalArgException {
     List<TurnoResponseDto> turnoList = turnoService.findByPacienteDni(dni);
-    if (turnoList.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
     return ResponseEntity.ok(turnoList);
   }
 }

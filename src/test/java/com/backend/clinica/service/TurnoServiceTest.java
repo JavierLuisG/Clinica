@@ -38,7 +38,7 @@ public class TurnoServiceTest {
   @Test
   @Order(1)
   @DisplayName("Crear un turno con paciente y odontólogo existentes")
-  void testCreateTurno() {
+  void testCreateTurno() throws ResourceNotFoundException, IllegalArgException {
     DomicilioRequestDto domicilioRequestDto = new DomicilioRequestDto("Av Siempre Viva", "742", "Springfield", "Texas");
     PacienteRequestDto pacienteRequestDto = new PacienteRequestDto("Homero", "Simpson", DNI_PACIENTE, LocalDateTime.now().toString(), domicilioRequestDto);
     PacienteResponseDto createdPaciente = pacienteService.createPaciente(pacienteRequestDto);
@@ -61,7 +61,7 @@ public class TurnoServiceTest {
   @Test
   @Order(2)
   @DisplayName("Buscar turno por ID")
-  void testGetTurnoById() {
+  void testGetTurnoById() throws ResourceNotFoundException, IllegalArgException {
     TurnoResponseDto turno = turnoService.getTurnoById(turnoCreadoId);
     assertNotNull(turno);
     assertEquals(turnoCreadoId, turno.getId());
@@ -84,7 +84,7 @@ public class TurnoServiceTest {
   @Test
   @Order(4)
   @DisplayName("Actualizar un turno")
-  void testUpdateTurno() {
+  void testUpdateTurno() throws IllegalArgException, ResourceNotFoundException {
     OdontologoResponseDto nuevoOdontologo = odontologoService.createOdontologo(new OdontologoRequestDto("OD99999", "Marvin", "Monroe"));
     TurnoRequestDto nuevoTurnoDto = new TurnoRequestDto("2025-09-01T09:25:00", nuevoOdontologo.getCodigo(), DNI_PACIENTE);
 

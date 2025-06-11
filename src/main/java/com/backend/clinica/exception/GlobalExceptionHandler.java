@@ -17,4 +17,9 @@ public class GlobalExceptionHandler {
   public ResponseEntity<MessageResponse> illegalArgException(IllegalArgException e) {
     return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
   }
+
+  @ExceptionHandler(ParseDateTimeException.class)
+  public ResponseEntity<MessageResponse> parseDateTimeException(ParseDateTimeException e) {
+    return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+  }
 }
