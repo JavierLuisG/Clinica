@@ -8,6 +8,7 @@ import com.backend.clinica.dto.response.TurnoResponseDto;
 import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.entity.Paciente;
 import com.backend.clinica.entity.Turno;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.repository.IOdontologoRepository;
 import com.backend.clinica.repository.IPacienteRepository;
 import com.backend.clinica.repository.ITurnoRepository;
@@ -92,16 +93,15 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public boolean deleteTurno(Integer id) {
+  public void deleteTurno(Integer id) throws ResourceNotFoundException {
     if (id == null) {
-      throw new IllegalArgumentException("Ingrese id.");
+      throw new IllegalArgumentException("Ingrese id");
     }
-    return turnoRepository.findById(id)
-        .map(turno -> {
-          turnoRepository.delete(turno);
-          LOGGER.info("Turno eliminado: {}", id);
-          return true;
-        }).orElse(false);
+    Turno turno = turnoRepository
+        .findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Turno " + id + " no encontrado"));
+    LOGGER.info("Turno eliminado: {}", id);
+    turnoRepository.delete(turno);
   }
 
   @Override

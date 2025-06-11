@@ -7,6 +7,7 @@ import com.backend.clinica.dto.request.TurnoRequestDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
 import com.backend.clinica.dto.response.PacienteResponseDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.impl.OdontologoService;
 import com.backend.clinica.service.impl.PacienteService;
 import com.backend.clinica.service.impl.TurnoService;
@@ -95,9 +96,8 @@ public class TurnoServiceTest {
   @Test
   @Order(5)
   @DisplayName("Eliminar un turno")
-  void testDeleteTurno() {
-    boolean eliminado = turnoService.deleteTurno(turnoCreadoId);
-    assertTrue(eliminado);
+  void testDeleteTurno() throws ResourceNotFoundException {
+    turnoService.deleteTurno(turnoCreadoId);
 
     assertThrows(EntityNotFoundException.class, () -> {
       turnoService.getTurnoById(turnoCreadoId);

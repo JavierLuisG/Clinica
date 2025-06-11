@@ -1,7 +1,9 @@
 package com.backend.clinica.controller;
 
+import com.backend.clinica.dto.MessageResponse;
 import com.backend.clinica.dto.request.TurnoRequestDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.ITurnoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -68,14 +70,9 @@ public class TurnoController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteTurno(@PathVariable Integer id) {
-    if (id == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
-    if (!turnoService.deleteTurno(id)) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  public ResponseEntity<MessageResponse> deleteTurno(@PathVariable Integer id) throws ResourceNotFoundException {
+    turnoService.deleteTurno(id);
+    return ResponseEntity.ok(new MessageResponse("Turno " + id + " eliminado"));
   }
 
   // ================== HQL methods ==================
