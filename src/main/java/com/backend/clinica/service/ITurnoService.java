@@ -1,5 +1,6 @@
 package com.backend.clinica.service;
 
+import com.backend.clinica.exception.IllegalArgException;
 import com.backend.clinica.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
@@ -14,7 +15,7 @@ public interface ITurnoService<Type, Request, Response> {
 
   Response updateTurno(Type id, Request t);
 
-  void deleteTurno(Type id) throws ResourceNotFoundException;
+  void deleteTurno(Type id) throws ResourceNotFoundException, IllegalArgException;
 
   // ================== HQL methods ==================
   List<Response> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate);

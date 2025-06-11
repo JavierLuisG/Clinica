@@ -12,4 +12,9 @@ public class GlobalExceptionHandler {
   public ResponseEntity<MessageResponse> resourceNotFoundException(ResourceNotFoundException e) {
     return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.NOT_FOUND);
   }
+
+  @ExceptionHandler(IllegalArgException.class)
+  public ResponseEntity<MessageResponse> illegalArgException(IllegalArgException e) {
+    return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+  }
 }

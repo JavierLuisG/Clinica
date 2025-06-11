@@ -3,6 +3,7 @@ package com.backend.clinica.controller;
 import com.backend.clinica.dto.MessageResponse;
 import com.backend.clinica.dto.request.TurnoRequestDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
+import com.backend.clinica.exception.IllegalArgException;
 import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.ITurnoService;
 import org.springframework.http.HttpStatus;
@@ -70,7 +71,7 @@ public class TurnoController {
   }
 
   @DeleteMapping("/{id}")
-  public ResponseEntity<MessageResponse> deleteTurno(@PathVariable Integer id) throws ResourceNotFoundException {
+  public ResponseEntity<MessageResponse> deleteTurno(@PathVariable Integer id) throws ResourceNotFoundException, IllegalArgException {
     turnoService.deleteTurno(id);
     return ResponseEntity.ok(new MessageResponse("Turno " + id + " eliminado"));
   }

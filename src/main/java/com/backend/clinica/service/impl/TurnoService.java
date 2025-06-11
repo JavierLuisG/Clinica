@@ -8,6 +8,7 @@ import com.backend.clinica.dto.response.TurnoResponseDto;
 import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.entity.Paciente;
 import com.backend.clinica.entity.Turno;
+import com.backend.clinica.exception.IllegalArgException;
 import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.repository.IOdontologoRepository;
 import com.backend.clinica.repository.IPacienteRepository;
@@ -93,9 +94,9 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public void deleteTurno(Integer id) throws ResourceNotFoundException {
-    if (id == null) {
-      throw new IllegalArgumentException("Ingrese id");
+  public void deleteTurno(Integer id) throws ResourceNotFoundException, IllegalArgException {
+    if (id == null || id <= 0) {
+      throw new IllegalArgException("Ingrese correctamente el id");
     }
     Turno turno = turnoRepository
         .findById(id)
