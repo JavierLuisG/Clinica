@@ -5,9 +5,10 @@ import com.backend.clinica.dto.response.DomicilioResponseDto;
 import com.backend.clinica.dto.response.PacienteResponseDto;
 import com.backend.clinica.entity.Domicilio;
 import com.backend.clinica.entity.Paciente;
+import com.backend.clinica.exception.IllegalArgException;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.repository.IPacienteRepository;
 import com.backend.clinica.service.IPacienteService;
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,13 +27,13 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
   }
 
   @Override
-  public PacienteResponseDto createPaciente(PacienteRequestDto paciente) {
+  public PacienteResponseDto createPaciente(PacienteRequestDto paciente) throws IllegalArgException {
     // 1. validaciones
     if (paciente == null || paciente.getDomicilio() == null) {
-      throw new IllegalArgumentException("Datos incompletos.");
+      throw new IllegalArgException("Ingrese correctamente los datos");
     }
     if (pacienteRepository.findByDni(paciente.getDni()).isPresent()) {
-      throw new IllegalArgumentException("Ya existe odontólogo con código: " + paciente.getDni());
+      throw new IllegalArgException("Ya existe paciente con Dni: " + paciente.getDni());
     }
     // 2. crear entidades
     Domicilio createdDomicilio = new Domicilio(
@@ -55,13 +56,11 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
   }
 
   @Override
-  public PacienteResponseDto getPacienteByDni(String dni) {
+  public PacienteResponseDto getPacienteByDni(String dni) throws IllegalArgException, ResourceNotFoundException {
     if (dni == null) {
-      throw new IllegalArgumentException("Ingrese dni.");
+      throw new IllegalArgException("Ingrese correctamente el Dni");
     }
-    Paciente findPaciente = pacienteRepository
-            .findByDni(dni)
-            .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
+    Paciente findPaciente = getPacienteOrThrow(dni);
     return mapToDto(findPaciente);
   }
 
@@ -76,13 +75,11 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
   }
 
   @Override
-  public PacienteResponseDto updatePaciente(String dni, PacienteRequestDto paciente) {
+  public PacienteResponseDto updatePaciente(String dni, PacienteRequestDto paciente) throws ResourceNotFoundException, IllegalArgException {
     if (dni == null || paciente == null || paciente.getDomicilio() == null) {
-      throw new IllegalArgumentException("Datos invalidos para actualizar.");
+      throw new IllegalArgException("Datos inválidos para actualizar");
     }
-    Paciente findPaciente = pacienteRepository
-            .findByDni(dni)
-            .orElseThrow(() -> new EntityNotFoundException("Paciente no encontrado: " + dni));
+    Paciente findPaciente = getPacienteOrThrow(dni);
 
     findPaciente.getDomicilio().setCalle(paciente.getDomicilio().getCalle());
     findPaciente.getDomicilio().setNumero(paciente.getDomicilio().getNumero());
@@ -97,16 +94,18 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
   }
 
   @Override
-  public boolean deletePaciente(String dni) {
+  public void deletePaciente(String dni) throws IllegalArgException, ResourceNotFoundException {
     if (dni == null) {
-      throw new IllegalArgumentException("Ingrese dni.");
+      throw new IllegalArgException("Ingrese correctamente el dni");
     }
+    Paciente paciente = getPacienteOrThrow(dni);
+    LOGGER.info("Paciente eliminado: {}", dni);
+    pacienteRepository.delete(paciente);
+  }
+
+  private Paciente getPacienteOrThrow(String dni) throws ResourceNotFoundException {
     return pacienteRepository.findByDni(dni)
-            .map(paciente -> {
-              pacienteRepository.delete(paciente);
-              LOGGER.info("Paciente eliminado: {}", dni);
-              return true;
-            }).orElse(false);
+        .orElseThrow(() -> new ResourceNotFoundException("Paciente " + dni + " no encontrado"));
   }
 
   private DomicilioResponseDto mapToDto(Domicilio domicilio) {

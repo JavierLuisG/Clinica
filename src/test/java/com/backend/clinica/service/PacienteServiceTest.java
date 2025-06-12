@@ -3,6 +3,8 @@ package com.backend.clinica.service;
 import com.backend.clinica.dto.request.DomicilioRequestDto;
 import com.backend.clinica.dto.request.PacienteRequestDto;
 import com.backend.clinica.dto.response.PacienteResponseDto;
+import com.backend.clinica.exception.IllegalArgException;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.impl.DomicilioService;
 import com.backend.clinica.service.impl.PacienteService;
 import jakarta.persistence.EntityNotFoundException;
@@ -28,7 +30,7 @@ class PacienteServiceTest {
   @Test
   @Order(1)
   @DisplayName("Agregar un paciente con domicilio nuevo y buscarlo en la db")
-  void testInsertPacienteWithNewDomicilio() {
+  void testInsertPacienteWithNewDomicilio() throws IllegalArgException {
     DomicilioRequestDto domicilioDto = new DomicilioRequestDto("Cl. Siempre Viva", "247", "Spring-field", "Texas");
     PacienteRequestDto pacienteDto = new PacienteRequestDto("Bart", "Simpson", DNI_BART, LocalDateTime.now().toString(), domicilioDto);
 
@@ -45,7 +47,7 @@ class PacienteServiceTest {
   @Test
   @Order(2)
   @DisplayName("Buscar paciente por DNI")
-  void testGetPacienteByDni() {
+  void testGetPacienteByDni() throws ResourceNotFoundException, IllegalArgException {
     PacienteResponseDto encontrado = pacienteService.getPacienteByDni(DNI_BART);
     assertNotNull(encontrado, "Debería encontrarse el paciente");
     assertEquals("Bart", encontrado.getNombre());
@@ -70,7 +72,7 @@ class PacienteServiceTest {
   @Test
   @Order(4)
   @DisplayName("Actualizar información de un paciente")
-  void testUpdatePaciente() {
+  void testUpdatePaciente() throws ResourceNotFoundException, IllegalArgException {
     PacienteResponseDto original = pacienteService.getPacienteByDni(DNI_BART);
     assertNotNull(original);
 
@@ -104,7 +106,7 @@ class PacienteServiceTest {
   @Test
   @Order(5)
   @DisplayName("Crear y eliminar un paciente")
-  void testDeletePaciente() {
+  void testDeletePaciente() throws IllegalArgException, ResourceNotFoundException {
     DomicilioRequestDto domicilioDto = new DomicilioRequestDto("Calle Temporal", "123", "Ciudad X", "Provincia Y");
     PacienteRequestDto pacienteDto = new PacienteRequestDto("Temporal", "Paciente", DNI_TEMP, LocalDateTime.now().toString(), domicilioDto);
 
@@ -114,8 +116,7 @@ class PacienteServiceTest {
     PacienteResponseDto verificado = pacienteService.getPacienteByDni(DNI_TEMP);
     assertNotNull(verificado, "El paciente debería existir antes de eliminarlo");
 
-    boolean eliminado = pacienteService.deletePaciente(DNI_TEMP);
-    assertTrue(eliminado, "La eliminación debería ser exitosa");
+    pacienteService.deletePaciente(DNI_TEMP);
 
     assertThrows(EntityNotFoundException.class, () -> {
       pacienteService.getPacienteByDni(DNI_TEMP);

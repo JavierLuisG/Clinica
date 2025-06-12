@@ -1,16 +1,19 @@
 package com.backend.clinica.service;
 
+import com.backend.clinica.exception.IllegalArgException;
+import com.backend.clinica.exception.ResourceNotFoundException;
+
 import java.util.List;
 
 public interface IPacienteService<Type, Request, Response> {
 
-  Response createPaciente(Request t);
+  Response createPaciente(Request t) throws IllegalArgException;
 
-  Response getPacienteByDni(Type dni);
+  Response getPacienteByDni(Type dni) throws IllegalArgException, ResourceNotFoundException;
 
   List<Response> getAllPacientes();
 
-  Response updatePaciente(Type dni, Request t);
+  Response updatePaciente(Type dni, Request t) throws ResourceNotFoundException, IllegalArgException;
 
-  boolean deletePaciente(Type dni);
+  void deletePaciente(Type dni) throws IllegalArgException, ResourceNotFoundException;
 }
