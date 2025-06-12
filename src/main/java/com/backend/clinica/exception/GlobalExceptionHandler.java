@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,5 +22,13 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(ParseDateTimeException.class)
   public ResponseEntity<MessageResponse> parseDateTimeException(ParseDateTimeException e) {
     return new ResponseEntity<>(new MessageResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<MessageResponse> handleDateParseError(MethodArgumentTypeMismatchException e) {
+    return new ResponseEntity<>(
+        new MessageResponse("Ingrese correctamente el rango de fechas con el formato: yyyy-MM-dd'T'HH:mm"),
+        HttpStatus.BAD_REQUEST
+    );
   }
 }

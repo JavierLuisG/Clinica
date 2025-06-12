@@ -4,15 +4,14 @@ import com.backend.clinica.dto.MessageResponse;
 import com.backend.clinica.dto.request.TurnoRequestDto;
 import com.backend.clinica.dto.response.TurnoResponseDto;
 import com.backend.clinica.exception.IllegalArgException;
-import com.backend.clinica.exception.ParseDateTimeException;
 import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.ITurnoService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -23,8 +22,6 @@ public class TurnoController {
   public TurnoController(ITurnoService<Integer, TurnoRequestDto, TurnoResponseDto> turnoService) {
     this.turnoService = turnoService;
   }
-
-  private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
   @PostMapping
   public ResponseEntity<TurnoResponseDto> postTurno(@RequestBody TurnoRequestDto turno) throws ResourceNotFoundException, IllegalArgException {
@@ -59,18 +56,10 @@ public class TurnoController {
   // ================== HQL methods ==================
   @GetMapping("/fecha")
   public ResponseEntity<List<TurnoResponseDto>> getTurnosEntreFechas(
-      @RequestParam("firstDate") String firstDate,
-      @RequestParam("endDate") String endDate
-  ) throws ParseDateTimeException {
-    LocalDateTime first;
-    LocalDateTime end;
-    try {
-      first = LocalDateTime.parse(firstDate, formatter);
-      end = LocalDateTime.parse(endDate, formatter);
-    } catch (Exception e) {
-      throw new ParseDateTimeException("Ingrese correctamente el rango de fechas");
-    }
-    List<TurnoResponseDto> turnoList = turnoService.findByStartDateBetween(first, end);
+      @RequestParam("firstDate") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime firstDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime endDate
+  ) {
+    List<TurnoResponseDto> turnoList = turnoService.findByStartDateBetween(firstDate, endDate);
     return ResponseEntity.ok(turnoList);
   }
 
