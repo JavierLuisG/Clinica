@@ -58,7 +58,7 @@ public class TurnoController {
   public ResponseEntity<List<TurnoResponseDto>> getTurnosEntreFechas(
       @RequestParam("firstDate") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime firstDate,
       @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime endDate
-  ) {
+  ) throws IllegalArgException {
     List<TurnoResponseDto> turnoList = turnoService.findByStartDateBetween(firstDate, endDate);
     return ResponseEntity.ok(turnoList);
   }

@@ -103,7 +103,10 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   }
 
   @Override
-  public List<TurnoResponseDto> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate) {
+  public List<TurnoResponseDto> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate) throws IllegalArgException {
+    if (firstDate.isAfter(endDate)) {
+      throw new IllegalArgException("La fecha inicial no puede ser posterior a la fecha final");
+    }
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoRepository.findByStartDateBetween(firstDate, endDate);
     for (Turno turno : turnoList) {

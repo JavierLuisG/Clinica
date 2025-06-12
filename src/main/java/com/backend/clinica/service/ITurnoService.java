@@ -18,7 +18,7 @@ public interface ITurnoService<Type, Request, Response> {
   void deleteTurno(Type id) throws ResourceNotFoundException, IllegalArgException;
 
   // ================== HQL methods ==================
-  List<Response> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate);
+  List<Response> findByStartDateBetween(LocalDateTime firstDate, LocalDateTime endDate) throws IllegalArgException;
 
   List<Response> findByOdontologoCodigo(String codigo) throws IllegalArgException;
 
