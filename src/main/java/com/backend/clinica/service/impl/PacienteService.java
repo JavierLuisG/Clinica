@@ -32,7 +32,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
       throw new IllegalArgException("Ingrese correctamente los datos del Paciente");
     }
     if (pacienteRepository.findByDni(paciente.getDni()).isPresent()) {
-      throw new IllegalArgException("Ya existe paciente con Dni: " + paciente.getDni());
+      throw new IllegalArgException("Ya existe Paciente con Dni: " + paciente.getDni());
     }
     Domicilio createdDomicilio = new Domicilio(
         paciente.getDomicilio().getCalle(),
@@ -94,7 +94,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
   @Override
   public void deletePaciente(String dni) throws IllegalArgException, ResourceNotFoundException {
     if (dni == null) {
-      throw new IllegalArgException("Ingrese correctamente el dni");
+      throw new IllegalArgException("Ingrese correctamente el Dni del Paciente");
     }
     Paciente paciente = getPacienteOrThrow(dni);
     LOGGER.info("Paciente eliminado: {}", dni);

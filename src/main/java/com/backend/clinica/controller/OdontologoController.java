@@ -1,7 +1,10 @@
 package com.backend.clinica.controller;
 
+import com.backend.clinica.dto.MessageResponse;
 import com.backend.clinica.dto.request.OdontologoRequestDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
+import com.backend.clinica.exception.IllegalArgException;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.IOdontologoService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,58 +22,32 @@ public class OdontologoController {
   }
 
   @PostMapping
-  public ResponseEntity<OdontologoResponseDto> postOdontologo(@RequestBody OdontologoRequestDto odontologo) {
-    if (odontologo == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<OdontologoResponseDto> postOdontologo(@RequestBody OdontologoRequestDto odontologo) throws IllegalArgException {
     OdontologoResponseDto createOdontologo = iOdontologoService.createOdontologo(odontologo);
-    if (createOdontologo == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
     return ResponseEntity.status(HttpStatus.CREATED).body(createOdontologo);
   }
 
   @GetMapping("/{codigo}")
-  public ResponseEntity<OdontologoResponseDto> getOdontologoByCodigo(@PathVariable String codigo) {
-    if (codigo == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<OdontologoResponseDto> getOdontologoByCodigo(@PathVariable String codigo) throws ResourceNotFoundException, IllegalArgException {
     OdontologoResponseDto odontologo = iOdontologoService.getOdontologoByCodigo(codigo);
-    if (odontologo == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
     return ResponseEntity.ok(odontologo);
   }
 
   @GetMapping
   public ResponseEntity<List<OdontologoResponseDto>> getAllOdontologos() {
     List<OdontologoResponseDto> odontologoList = iOdontologoService.getAllOdontologos();
-    if (odontologoList.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
     return ResponseEntity.ok(odontologoList);
   }
 
   @PutMapping("/{codigo}")
-  public ResponseEntity<OdontologoResponseDto> putOdontologo(@PathVariable String codigo, @RequestBody OdontologoRequestDto odontologo) {
-    if (codigo == null || codigo.isEmpty() || odontologo == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
+  public ResponseEntity<OdontologoResponseDto> putOdontologo(@PathVariable String codigo, @RequestBody OdontologoRequestDto odontologo) throws ResourceNotFoundException, IllegalArgException {
     OdontologoResponseDto updateOdontologo = iOdontologoService.updateOdontologo(codigo, odontologo);
-    if (updateOdontologo == null) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
     return ResponseEntity.ok(updateOdontologo);
   }
 
   @DeleteMapping("/{codigo}")
-  public ResponseEntity<Void> deleteOdontologo(@PathVariable String codigo) {
-    if (codigo == null) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-    }
-    if (!iOdontologoService.deleteOdontologo(codigo)) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-    return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+  public ResponseEntity<MessageResponse> deleteOdontologo(@PathVariable String codigo) throws ResourceNotFoundException, IllegalArgException {
+    iOdontologoService.deleteOdontologo(codigo);
+    return ResponseEntity.ok(new MessageResponse("Odontólogo " + codigo + " eliminado"));
   }
 }

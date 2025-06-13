@@ -2,6 +2,8 @@ package com.backend.clinica.service;
 
 import com.backend.clinica.dto.request.OdontologoRequestDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
+import com.backend.clinica.exception.IllegalArgException;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.service.impl.OdontologoService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
@@ -21,7 +23,7 @@ class OdontologoServiceTest {
   @Test
   @Order(1)
   @DisplayName("Agregar un odontólogo")
-  void insertarOdontologo() {
+  void insertarOdontologo() throws IllegalArgException, ResourceNotFoundException {
     // Crear un nuevo odontologo
     OdontologoRequestDto odontologoCreado = new OdontologoRequestDto("OD00129", "Camilo", "Perez");
     OdontologoResponseDto resOdontologo = odontologoService.createOdontologo(odontologoCreado);
@@ -36,7 +38,7 @@ class OdontologoServiceTest {
   @Test
   @Order(2)
   @DisplayName("Buscar odontólogo por Código")
-  void testGetPacienteByDni() {
+  void testGetPacienteByDni() throws ResourceNotFoundException, IllegalArgException {
     OdontologoResponseDto odontologoObtenido = odontologoService.getOdontologoByCodigo("OD00129");
     assertNotNull(odontologoObtenido, "El odontólogo debería existir");
     assertEquals("Camilo", odontologoObtenido.getNombre(), "El nombre debe coincidir");
@@ -56,7 +58,7 @@ class OdontologoServiceTest {
   @Test
   @Order(4)
   @DisplayName("Actualizar información de un odontólogo")
-  void testUpdateOdontólogo() {
+  void testUpdateOdontólogo() throws ResourceNotFoundException, IllegalArgException {
     // Obtener un odontólogo existente
     OdontologoResponseDto odontologoOriginal = odontologoService.getOdontologoByCodigo("OD00129");
     assertNotNull(odontologoOriginal, "El odontólogo debería existir");
@@ -67,9 +69,9 @@ class OdontologoServiceTest {
 
     // Crear odontólogo con datos actualizados
     OdontologoRequestDto odontologoActualizado = new OdontologoRequestDto(
-            odontologoOriginal.getCodigo(),
-            nuevoNombre,
-            nuevoApellido);
+        odontologoOriginal.getCodigo(),
+        nuevoNombre,
+        nuevoApellido);
 
     // Actualizar odontólogo
     OdontologoResponseDto resultado = odontologoService.updateOdontologo("OD00129", odontologoActualizado);
@@ -88,14 +90,13 @@ class OdontologoServiceTest {
   @Test
   @Order(5)
   @DisplayName("Eliminar un odontólogo")
-  void testDeletePaciente() {
+  void testDeletePaciente() throws IllegalArgException, ResourceNotFoundException {
     // Verificar que existe
     OdontologoResponseDto verificacionExistencia = odontologoService.getOdontologoByCodigo("OD00129");
     assertNotNull(verificacionExistencia, "El odontólogo debería existir antes de eliminarlo");
 
     // Eliminar odontólogo
-    boolean resultado = odontologoService.deleteOdontologo("OD00129");
-    assertTrue(resultado, "La eliminación debería ser exitosa");
+    odontologoService.deleteOdontologo("OD00129");
 
     // Verificar que ya no se puede recuperar
     // OdontologoResponseDto verificacionEliminacion = odontologoService.getOdontologoByCodigo("OD00129");

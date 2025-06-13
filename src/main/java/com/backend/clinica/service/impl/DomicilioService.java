@@ -77,7 +77,7 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
   @Override
   public void deleteDomicilio(Integer id) throws IllegalArgException, ResourceNotFoundException {
     if (id == null) {
-      throw new IllegalArgException("Ingrese correctamente el id");
+      throw new IllegalArgException("Ingrese correctamente el id del Domicilio");
     }
     Domicilio domicilio = getDomicilioOrThrow(id);
     LOGGER.info("Domicilio eliminado: {}", id);

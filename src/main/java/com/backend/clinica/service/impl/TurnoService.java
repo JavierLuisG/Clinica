@@ -95,7 +95,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   @Override
   public void deleteTurno(Integer id) throws ResourceNotFoundException, IllegalArgException {
     if (id == null || id <= 0) {
-      throw new IllegalArgException("Ingrese correctamente el id");
+      throw new IllegalArgException("Ingrese correctamente el id del Turno");
     }
     Turno findTurno = getTurnoOrThrow(id);
     LOGGER.info("Turno eliminado: {}", id);
@@ -118,7 +118,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   @Override
   public List<TurnoResponseDto> findByOdontologoCodigo(String codigo) throws IllegalArgException {
     if (codigo == null) {
-      throw new IllegalArgException("Ingrese correctamente el código");
+      throw new IllegalArgException("Ingrese correctamente el Código del Odontólogo");
     }
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoRepository.findByOdontologoCodigo(codigo);
@@ -131,7 +131,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   @Override
   public List<TurnoResponseDto> findByPacienteDni(String dni) throws IllegalArgException {
     if (dni == null) {
-      throw new IllegalArgException("Ingrese correctamente el id");
+      throw new IllegalArgException("Ingrese correctamente el Dni del Paciente");
     }
     List<TurnoResponseDto> turnoResponseDtoList = new ArrayList<>();
     List<Turno> turnoList = turnoRepository.findByPacienteDni(dni);
