@@ -3,9 +3,10 @@ package com.backend.clinica.service.impl;
 import com.backend.clinica.dto.request.DomicilioRequestDto;
 import com.backend.clinica.dto.response.DomicilioResponseDto;
 import com.backend.clinica.entity.Domicilio;
+import com.backend.clinica.exception.IllegalArgException;
+import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.repository.IDomicilioRepository;
 import com.backend.clinica.service.IDomicilioService;
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,28 +24,26 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
   }
 
   @Override
-  public DomicilioResponseDto createDomicilio(DomicilioRequestDto domicilio) {
+  public DomicilioResponseDto createDomicilio(DomicilioRequestDto domicilio) throws IllegalArgException {
     if (domicilio == null) {
-      throw new IllegalArgumentException("Datos incompletos.");
+      throw new IllegalArgException("Ingrese correctamente los datos del Domicilio");
     }
     Domicilio createdDomicilio = new Domicilio(
-            domicilio.getCalle(),
-            domicilio.getNumero(),
-            domicilio.getLocalidad(),
-            domicilio.getCiudad());
+        domicilio.getCalle(),
+        domicilio.getNumero(),
+        domicilio.getLocalidad(),
+        domicilio.getCiudad());
     Domicilio savedDomicilio = domicilioRepository.save(createdDomicilio);
     LOGGER.info("Domicilio guardado: {}", savedDomicilio.getId());
     return mapToDto(savedDomicilio);
   }
 
   @Override
-  public DomicilioResponseDto getDomicilioById(Integer id) {
-    if (id == null) {
-      throw new IllegalArgumentException("Ingrese id.");
+  public DomicilioResponseDto getDomicilioById(Integer id) throws IllegalArgException, ResourceNotFoundException {
+    if (id == null || id <= 0) {
+      throw new IllegalArgException("Ingrese correctamente el id de Domicilio");
     }
-    Domicilio findDomicilio = domicilioRepository
-            .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Domicilio no encontrado: " + id));
+    Domicilio findDomicilio = getDomicilioOrThrow(id);
     return mapToDto(findDomicilio);
   }
 
@@ -59,13 +58,11 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
   }
 
   @Override
-  public DomicilioResponseDto updateDomicilio(Integer id, DomicilioRequestDto domicilio) {
-    if (id == null || domicilio == null) {
-      throw new IllegalArgumentException("Datos invalidos para actualizar.");
+  public DomicilioResponseDto updateDomicilio(Integer id, DomicilioRequestDto domicilio) throws ResourceNotFoundException, IllegalArgException {
+    if (id == null || id <= 0 || domicilio == null) {
+      throw new IllegalArgException("Datos invalidos para actualizar Domicilio: " + id);
     }
-    Domicilio findDomicilio = domicilioRepository
-            .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Domicilio no encontrado: " + id));
+    Domicilio findDomicilio = getDomicilioOrThrow(id);
 
     findDomicilio.setCalle(domicilio.getCalle());
     findDomicilio.setNumero(domicilio.getNumero());
@@ -78,24 +75,26 @@ public class DomicilioService implements IDomicilioService<Integer, DomicilioReq
   }
 
   @Override
-  public boolean deleteDomicilio(Integer id) {
+  public void deleteDomicilio(Integer id) throws IllegalArgException, ResourceNotFoundException {
     if (id == null) {
-      throw new IllegalArgumentException("Ingrese id.");
+      throw new IllegalArgException("Ingrese correctamente el id");
     }
+    Domicilio domicilio = getDomicilioOrThrow(id);
+    LOGGER.info("Domicilio eliminado: {}", id);
+    domicilioRepository.delete(domicilio);
+  }
+
+  private Domicilio getDomicilioOrThrow(Integer id) throws ResourceNotFoundException {
     return domicilioRepository.findById(id)
-            .map(domicilio -> {
-              domicilioRepository.delete(domicilio);
-              LOGGER.info("Domicilio eliminado: {}", id);
-              return true;
-            }).orElse(false);
+        .orElseThrow(() -> new ResourceNotFoundException("Domicilio " + id + " no encontrado"));
   }
 
   private DomicilioResponseDto mapToDto(Domicilio domicilio) {
     return new DomicilioResponseDto(
-            domicilio.getId(),
-            domicilio.getCalle(),
-            domicilio.getNumero(),
-            domicilio.getLocalidad(),
-            domicilio.getCiudad());
+        domicilio.getId(),
+        domicilio.getCalle(),
+        domicilio.getNumero(),
+        domicilio.getLocalidad(),
+        domicilio.getCiudad());
   }
 }

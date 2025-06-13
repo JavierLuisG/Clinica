@@ -28,28 +28,26 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
 
   @Override
   public PacienteResponseDto createPaciente(PacienteRequestDto paciente) throws IllegalArgException {
-    // 1. validaciones
     if (paciente == null || paciente.getDomicilio() == null) {
-      throw new IllegalArgException("Ingrese correctamente los datos");
+      throw new IllegalArgException("Ingrese correctamente los datos del Paciente");
     }
     if (pacienteRepository.findByDni(paciente.getDni()).isPresent()) {
       throw new IllegalArgException("Ya existe paciente con Dni: " + paciente.getDni());
     }
-    // 2. crear entidades
     Domicilio createdDomicilio = new Domicilio(
-            paciente.getDomicilio().getCalle(),
-            paciente.getDomicilio().getNumero(),
-            paciente.getDomicilio().getLocalidad(),
-            paciente.getDomicilio().getCiudad());
+        paciente.getDomicilio().getCalle(),
+        paciente.getDomicilio().getNumero(),
+        paciente.getDomicilio().getLocalidad(),
+        paciente.getDomicilio().getCiudad());
     Paciente createdPaciente = new Paciente(
-            paciente.getNombre(),
-            paciente.getApellido(),
-            paciente.getDni(),
-            LocalDateTime.parse(paciente.getFechaRegistro()),
-            createdDomicilio);
-    // 3. asociar relación inversa
+        paciente.getNombre(),
+        paciente.getApellido(),
+        paciente.getDni(),
+        LocalDateTime.parse(paciente.getFechaRegistro()),
+        createdDomicilio);
+
     createdDomicilio.setPaciente(createdPaciente);
-    // 4. guardar y devolver DTO
+
     Paciente savedPaciente = pacienteRepository.save(createdPaciente);
     LOGGER.info("Paciente guardado: {}", savedPaciente.getDni());
     return mapToDto(savedPaciente);
@@ -58,7 +56,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
   @Override
   public PacienteResponseDto getPacienteByDni(String dni) throws IllegalArgException, ResourceNotFoundException {
     if (dni == null) {
-      throw new IllegalArgException("Ingrese correctamente el Dni");
+      throw new IllegalArgException("Ingrese correctamente el Dni del Paciente");
     }
     Paciente findPaciente = getPacienteOrThrow(dni);
     return mapToDto(findPaciente);
@@ -77,7 +75,7 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
   @Override
   public PacienteResponseDto updatePaciente(String dni, PacienteRequestDto paciente) throws ResourceNotFoundException, IllegalArgException {
     if (dni == null || paciente == null || paciente.getDomicilio() == null) {
-      throw new IllegalArgException("Datos inválidos para actualizar");
+      throw new IllegalArgException("Datos inválidos para actualizar Paciente: " + dni);
     }
     Paciente findPaciente = getPacienteOrThrow(dni);
 
@@ -110,20 +108,20 @@ public class PacienteService implements IPacienteService<String, PacienteRequest
 
   private DomicilioResponseDto mapToDto(Domicilio domicilio) {
     return new DomicilioResponseDto(
-            domicilio.getId(),
-            domicilio.getCalle(),
-            domicilio.getNumero(),
-            domicilio.getLocalidad(),
-            domicilio.getCiudad());
+        domicilio.getId(),
+        domicilio.getCalle(),
+        domicilio.getNumero(),
+        domicilio.getLocalidad(),
+        domicilio.getCiudad());
   }
 
   private PacienteResponseDto mapToDto(Paciente paciente) {
     return new PacienteResponseDto(
-            paciente.getId(),
-            paciente.getNombre(),
-            paciente.getApellido(),
-            paciente.getDni(),
-            paciente.getFechaRegistro().toString(),
-            mapToDto(paciente.getDomicilio()));
+        paciente.getId(),
+        paciente.getNombre(),
+        paciente.getApellido(),
+        paciente.getDni(),
+        paciente.getFechaRegistro().toString(),
+        mapToDto(paciente.getDomicilio()));
   }
 }

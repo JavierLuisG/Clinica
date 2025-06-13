@@ -29,9 +29,9 @@ public class Paciente {
   private LocalDateTime fechaRegistro;
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(
-          name = "id_domicilio",
-          nullable = false,
-          foreignKey = @ForeignKey(name = "fk_paciente_domicilio")
+      name = "id_domicilio",
+      nullable = false,
+      foreignKey = @ForeignKey(name = "fk_paciente_domicilio")
   )
   private Domicilio domicilio;
   @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL)

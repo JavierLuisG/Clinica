@@ -41,7 +41,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   @Override
   public TurnoResponseDto createTurno(TurnoRequestDto turno) throws ResourceNotFoundException, IllegalArgException {
     if (turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      throw new IllegalArgException("Ingrese correctamente los datos");
+      throw new IllegalArgException("Ingrese correctamente los datos del Turno");
     }
     Odontologo findOdontologo = getOdontologoOrThrow(turno.getOdontologoCodigo());
     Paciente findPaciente = getPacienteOrThrow(turno.getPacienteDni());
@@ -57,8 +57,8 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
 
   @Override
   public TurnoResponseDto getTurnoById(Integer id) throws ResourceNotFoundException, IllegalArgException {
-    if (id == null) {
-      throw new IllegalArgException("Ingrese correctamente el id");
+    if (id == null || id <= 0) {
+      throw new IllegalArgException("Ingrese correctamente el id de Turno");
     }
     Turno findTurno = getTurnoOrThrow(id);
     return mapToResponseDto(findTurno);
@@ -77,7 +77,7 @@ public class TurnoService implements ITurnoService<Integer, TurnoRequestDto, Tur
   @Override
   public TurnoResponseDto updateTurno(Integer id, TurnoRequestDto turno) throws IllegalArgException, ResourceNotFoundException {
     if (id == null || id <= 0 || turno == null || turno.getOdontologoCodigo() == null || turno.getPacienteDni() == null) {
-      throw new IllegalArgException("Datos inválidos para actualizar");
+      throw new IllegalArgException("Datos inválidos para actualizar Turno: " + id);
     }
     Odontologo findOdontologo = getOdontologoOrThrow(turno.getOdontologoCodigo());
     Paciente findPaciente = getPacienteOrThrow(turno.getPacienteDni());
