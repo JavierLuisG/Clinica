@@ -24,6 +24,12 @@ public class Odontologo {
   @OneToMany(mappedBy = "odontologo", cascade = CascadeType.ALL)
   @JsonIgnore
   private Set<Turno> turnos = new HashSet<>();
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "odontologos_especialidades",
+      joinColumns = @JoinColumn(name = "odontologo"),
+      inverseJoinColumns = @JoinColumn(name = "especialidad")
+  )
+  private Set<Especialidad> especialidades = new HashSet<>();
   private boolean state = true;
 
   public Odontologo(Integer id, String codigo, String nombre, String apellido) {
