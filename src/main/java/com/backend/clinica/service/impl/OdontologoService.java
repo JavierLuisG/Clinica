@@ -1,18 +1,23 @@
 package com.backend.clinica.service.impl;
 
 import com.backend.clinica.dto.request.OdontologoRequestDto;
+import com.backend.clinica.dto.response.EspecialidadResponseDto;
 import com.backend.clinica.dto.response.OdontologoResponseDto;
+import com.backend.clinica.entity.Especialidad;
 import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.exception.IllegalArgException;
 import com.backend.clinica.exception.ResourceNotFoundException;
 import com.backend.clinica.repository.IOdontologoRepository;
 import com.backend.clinica.service.IOdontologoService;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class OdontologoService implements IOdontologoService<String, OdontologoRequestDto, OdontologoResponseDto> {
@@ -40,6 +45,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     return mapToDto(savedOdontologo);
   }
 
+  @Transactional
   @Override
   public OdontologoResponseDto getOdontologoByCodigo(String codigo) throws ResourceNotFoundException, IllegalArgException {
     if (codigo == null) {
@@ -49,6 +55,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     return mapToDto(findOdontologo);
   }
 
+  @Transactional
   @Override
   public List<OdontologoResponseDto> getAllOdontologos() {
     List<OdontologoResponseDto> odontologoResponseDtoList = new ArrayList<>();
@@ -59,6 +66,7 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     return odontologoResponseDtoList;
   }
 
+  @Transactional
   @Override
   public OdontologoResponseDto updateOdontologo(String codigo, OdontologoRequestDto odontologo) throws IllegalArgException, ResourceNotFoundException {
     if (codigo == null || odontologo == null) {
@@ -89,11 +97,23 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
         .orElseThrow(() -> new ResourceNotFoundException("Odontólogo " + codigo + " no encontrado"));
   }
 
+  private Set<EspecialidadResponseDto> mapToDto(Set<Especialidad> especialidades) {
+    Set<EspecialidadResponseDto> especialidadResponseDtos = new HashSet<>();
+    for (Especialidad especialidad : especialidades) {
+      especialidadResponseDtos.add(new EspecialidadResponseDto(
+          especialidad.getId(), especialidad.getTipo()
+      ));
+    }
+    return especialidadResponseDtos;
+  }
+
   private OdontologoResponseDto mapToDto(Odontologo odontologo) {
     return new OdontologoResponseDto(
         odontologo.getId(),
         odontologo.getCodigo(),
         odontologo.getNombre(),
-        odontologo.getApellido());
+        odontologo.getApellido(),
+        mapToDto(odontologo.getEspecialidades())
+    );
   }
 }
