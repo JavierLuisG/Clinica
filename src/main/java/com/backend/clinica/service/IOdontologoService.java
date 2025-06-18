@@ -15,4 +15,8 @@ public interface IOdontologoService<Type, Request, Response> {
   Response updateOdontologo(Type codigo, Request t) throws IllegalArgException, ResourceNotFoundException;
 
   void deleteOdontologo(Type codigo) throws IllegalArgException, ResourceNotFoundException;
+
+  Response assignEspecialidad(Integer id_odontologo, Integer id_especialidad) throws IllegalArgException, ResourceNotFoundException;
+
+  Response removeEspecialidad(Integer id_odontologo, Integer id_especialidad) throws IllegalArgException, ResourceNotFoundException;
 }

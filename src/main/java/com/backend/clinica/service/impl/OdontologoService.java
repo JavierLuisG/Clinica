@@ -7,6 +7,7 @@ import com.backend.clinica.entity.Especialidad;
 import com.backend.clinica.entity.Odontologo;
 import com.backend.clinica.exception.IllegalArgException;
 import com.backend.clinica.exception.ResourceNotFoundException;
+import com.backend.clinica.repository.IEspecialidadRepository;
 import com.backend.clinica.repository.IOdontologoRepository;
 import com.backend.clinica.service.IOdontologoService;
 import jakarta.transaction.Transactional;
@@ -23,9 +24,11 @@ import java.util.Set;
 public class OdontologoService implements IOdontologoService<String, OdontologoRequestDto, OdontologoResponseDto> {
   private final Logger LOGGER = LoggerFactory.getLogger(OdontologoService.class);
   private final IOdontologoRepository odontologoRepository;
+  private final IEspecialidadRepository especialidadRepository;
 
-  public OdontologoService(IOdontologoRepository odontologoRepository) {
+  public OdontologoService(IOdontologoRepository odontologoRepository, IEspecialidadRepository especialidadRepository) {
     this.odontologoRepository = odontologoRepository;
+    this.especialidadRepository = especialidadRepository;
   }
 
   @Override
@@ -90,6 +93,53 @@ public class OdontologoService implements IOdontologoService<String, OdontologoR
     Odontologo odontologo = getOdontologoOrThrow(codigo);
     LOGGER.info("Odontólogo eliminado: {}", codigo);
     odontologoRepository.delete(odontologo);
+  }
+
+  @Transactional
+  @Override
+  public OdontologoResponseDto assignEspecialidad(Integer id_odontologo, Integer id_especialidad) throws IllegalArgException, ResourceNotFoundException {
+    if (id_odontologo == null || id_odontologo <= 0 || id_especialidad == null || id_especialidad <= 0) {
+      throw new IllegalArgException("Ingrese correctamente el id de Odontólogo y Especialidad");
+    }
+    Odontologo findOdontologo = odontologoRepository.findById(id_odontologo)
+        .orElseThrow(() -> new ResourceNotFoundException("Odontólogo " + id_odontologo + " no encontrado"));
+    Especialidad findEspecialidad = especialidadRepository.findById(id_especialidad)
+        .orElseThrow(() -> new ResourceNotFoundException("Especialidad " + id_especialidad + " no encontrada"));
+
+    Set<Especialidad> especialidades = findOdontologo.getEspecialidades();
+    for (Especialidad especialidad : especialidades) {
+      if (especialidad.getId().equals(id_especialidad)) {
+        throw new IllegalArgException("Especialidad " + especialidad.getTipo() + " ya existente en Odontólogo " + findOdontologo.getCodigo());
+      }
+    }
+
+    especialidades.add(findEspecialidad);
+    Odontologo saved = odontologoRepository.save(findOdontologo);
+    LOGGER.info("Especialidad asignada: {}, en odontologo: {}", findEspecialidad.getTipo(), saved.getCodigo());
+    return mapToDto(saved);
+  }
+
+  @Transactional
+  @Override
+  public OdontologoResponseDto removeEspecialidad(Integer id_odontologo, Integer id_especialidad) throws IllegalArgException, ResourceNotFoundException {
+    if (id_odontologo == null || id_odontologo <= 0 || id_especialidad == null || id_especialidad <= 0) {
+      throw new IllegalArgException("Ingrese correctamente el id de Odontólogo y Especialidad");
+    }
+    Odontologo findOdontologo = odontologoRepository.findById(id_odontologo)
+        .orElseThrow(() -> new ResourceNotFoundException("Odontólogo " + id_odontologo + " no encontrado"));
+    Especialidad findEspecialidad = especialidadRepository.findById(id_especialidad)
+        .orElseThrow(() -> new ResourceNotFoundException("Especialidad " + id_especialidad + " no encontrada"));
+
+    Set<Especialidad> especialidades = findOdontologo.getEspecialidades();
+    for (Especialidad especialidad : especialidades) {
+      if (especialidad.getId().equals(id_especialidad)) {
+        especialidades.remove(especialidad);
+        Odontologo saved = odontologoRepository.save(findOdontologo);
+        LOGGER.info("Especialidad eliminada: {}, en odontologo: {}", findEspecialidad.getTipo(), saved.getCodigo());
+        return mapToDto(saved);
+      }
+    }
+    throw new IllegalArgException("Especialidad " + findEspecialidad.getTipo() + " no existente en Odontólogo " + findOdontologo.getCodigo());
   }
 
   private Odontologo getOdontologoOrThrow(String codigo) throws ResourceNotFoundException {
