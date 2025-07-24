@@ -1,4 +1,4 @@
-package com.backend.clinica.configuration;
+package com.backend.clinica.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
